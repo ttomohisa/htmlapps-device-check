@@ -1,0 +1,26 @@
+{
+  "$schema": "./schemas/app-config.schema.json",
+  "name": "Device Check",
+  "nameJa": "Device Check",
+  "slug": "device-check",
+  "version": "1.0.0",
+  "description": "A browser utility for checking camera, microphone, speakers, display, keyboard, pointer, gamepad, and motion sensors.",
+  "descriptionJa": "カメラ、マイク、スピーカー、画面、キーボード、ポインター、ゲームパッド、モーションセンサーをブラウザーだけで確認する端末診断ツールです。",
+  "defaultLanguage": "auto",
+  "repository": {
+    "owner": "ttomohisa",
+    "name": "htmlapps-device-check"
+  },
+  "build": {
+    "output": "dist/index.html",
+    "blockRuntimeNetwork": true,
+    "selfExtract": {
+      "enabled": true,
+      "output": "dist/index.self-extract.html"
+    },
+    "sizeBudget": {
+      "readableWarningMb": 25,
+      "selfExtractWarningMb": 12
+    }
+  }
+}
