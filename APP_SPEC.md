@@ -57,6 +57,16 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Populate available microphones after permission reveals device labels.
 - Allow switching devices and stopping the stream / audio context.
 
+### Capture lifecycle and recovery
+- Camera and microphone requests have independent generations and operation-owned resources.
+- Stop, replacement, device selection changes, and page exit invalidate pending acquisition, default-device fallback, playback, audio setup, and device-list results.
+- Stop is enabled immediately while starting; Start is disabled during the pending attempt. An obsolete stream that arrives later is stopped without attaching it.
+- Stop releases tracks, the camera preview source, microphone graph nodes, AudioContext, and animation frames. Current input termination also releases resources and offers retry; stale termination cannot interrupt a newer session.
+- Check Web Audio availability before requesting microphone access. Rejected playback or audio startup must not count as a successful check.
+- Device-list failure is recoverable when capture is working: preserve capture and Stop, with a localized warning and retry hint.
+- Localized pending, stopped, input-ended, and failure hints survive language changes. Checked records a completed session result and is separate from current capture activity.
+- Stop cancels application ownership of the request, but cannot guarantee dismissal of the browser's permission prompt.
+
 ### Speaker
 - Generate a short local Web Audio sine tone.
 - Allow center, left, and right pan tests where stereo panning is available.
@@ -165,7 +175,9 @@ Direct `file://` opening is required for the application shell and non-permissio
 - All eight test sections are reachable and usable at 360px width.
 - Camera and microphone are never requested on initial page load.
 - Camera and microphone Stop actions release their MediaStream tracks.
-- Page exit releases camera / microphone and sensor listeners.
+- Page exit releases camera / microphone and sensor listeners, including streams delivered after exit.
+- Automated synthetic lifecycle regressions cover overlaps, interruption at every asynchronous stage, stale callbacks, default fallback, cleanup, and camera/microphone independence. These do not certify physical devices or OS indicators.
+- The checked-in `device-check.html` download matches the readable build except its build timestamp; the self-extract payload restores exact readable bytes.
 - Speaker tone is generated locally with Web Audio.
 - Display patterns are generated locally with CSS/DOM animation; no remote assets are required.
 - Keyboard events are not globally intercepted outside the keyboard test area.

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Fixed camera/microphone races around repeated starts, device changes, Stop, page exit, and late permission results.
+- Release operation-owned tracks, preview, audio graph/context, and animation resources; stale callbacks cannot overwrite newer sessions.
+- Report preview/audio startup failures honestly; retain working, stoppable capture when only device enumeration fails.
+- Added Japanese/English pending, stopped, and retry hints, independent of checked-result history.
+- Added synthetic lifecycle regressions and a checked-in download/self-extract parity gate.
+
 ## 1.0.0 - Device Check initial release - 2026-08-24
 
 - Replaced the starter workspace with the Browser Kitty Device Check application.
