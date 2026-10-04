@@ -123,9 +123,15 @@ Edit `src/index.template.html`; do not edit generated files in `dist/` directly.
 
 The build also produces manifests and size reports used by the template verification workflow.
 
+After intentional source edits, build with `./build-standalone.ps1`, copy `dist/index.html` to `device-check.html`, and run `./scripts/check-repository.ps1`. The check requires Node.js for synthetic media lifecycle and release-parity regressions; it rejects a stale root download. These tests use controlled promises and simulated media resources, never real devices or permissions.
+
 ## Runtime behavior
 
 Camera and microphone access starts only after the corresponding test is started. When a previously selected input device can no longer satisfy the requested constraint, Device Check automatically retries with the browser's default device instead of stopping on an `OverconstrainedError`.
+
+While a camera or microphone is starting, Start is disabled and Stop is available immediately. Changing the selected input replaces the pending or live attempt. Stop and leaving the page invalidate pending work; any late input is released. Stop may not dismiss the browser's permission prompt. A "Checked" result remains a session result after Stop; the hint states that capture has stopped.
+
+If preview playback or microphone audio setup fails, resources are released and Start lets you retry. Web Audio support is checked before microphone permission is requested. If only the device list fails, the current input stays active and stoppable, with a retry hint.
 
 The app does not need a backend for its diagnostics. The generated page includes a CSP with `connect-src 'none'`, and there are no analytics, remote fonts, CDN scripts, or runtime API calls. Only the language preference and quick-check visibility preference are stored locally; diagnostic values and mobile tab state are session-only.
 
