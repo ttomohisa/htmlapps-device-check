@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a keyboard-only clear-results button with localized navigation/reset guidance and fresh-session behavior.
+- Fixed the keyboard test trapping Tab / Shift+Tab; ordinary test keys remain scoped to the focused test area.
+- Added synthetic keyboard regressions for reset isolation, focus, summary, navigation, repeats, and bilingual copy.
+
 - Fixed camera/microphone races around repeated starts, device changes, Stop, page exit, and late permission results.
 - Release operation-owned tracks, preview, audio graph/context, and animation resources; stale callbacks cannot overwrite newer sessions.
 - Report preview/audio startup failures honestly; retain working, stoppable capture when only device enumeration fails.
