@@ -85,7 +85,9 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Display `key`, `code`, Shift/Ctrl/Alt/Meta state, unique key count, and a short recent-key history.
 - Maintain a visual keyboard map and highlight currently held keys.
 - Show current and maximum simultaneous held-key counts for Ghosting / N-key rollover checks.
-- Prevent test keystrokes from triggering unrelated page actions while the test area is focused.
+- Prevent test keystrokes from triggering unrelated page actions while the test area is focused, except Tab / Shift+Tab, which retain normal forward / reverse focus navigation. Tab may be recorded before focus leaves.
+- Provide a native **Clear keyboard results** button after and outside the test area. It clears only the keyboard history, current key/code, unique/held keys, modifiers, current/maximum simultaneous counts, and keyboard status, then updates the summary.
+- Clearing returns the keyboard to untested without changing other test results or active resources. Focus remains on the enabled clear button; starting another session requires explicitly returning to the test area. Repeated or empty clears are safe.
 
 ### Pointer / touch
 - Use Pointer Events.
@@ -180,7 +182,8 @@ Direct `file://` opening is required for the application shell and non-permissio
 - The checked-in `device-check.html` download matches the readable build except its build timestamp; the self-extract payload restores exact readable bytes.
 - Speaker tone is generated locally with Web Audio.
 - Display patterns are generated locally with CSS/DOM animation; no remote assets are required.
-- Keyboard events are not globally intercepted outside the keyboard test area.
+- Keyboard events are not globally intercepted outside the keyboard test area. Tab / Shift+Tab can leave it in both directions; blur releases held state without discarding history.
+- Synthetic keyboard regressions cover scoped reset, summary, focus, repeated clears, fresh re-entry, navigation, ordinary keys, Escape, repeats, outside input, and Japanese / English copy.
 - Gamepad haptics and motion tests fail gracefully when unsupported.
 - `assets/favicon.svg` matches the embedded favicon / header visual concept.
 - Japanese and English copy fits the mobile layout without horizontal overflow.

@@ -142,7 +142,7 @@ $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
 
-& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs")
-if ($LASTEXITCODE -ne 0) { throw "Media lifecycle or release artifact regressions failed." }
+& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Media lifecycle, keyboard result, or release artifact regressions failed." }
 
 Write-Host "[OK] Repository check passed." -ForegroundColor Green

@@ -78,6 +78,8 @@ Display patterns are visual checks, not color calibration. Full-screen mode make
 
 For keyboards, hold multiple keys together to observe the maximum simultaneous keys detected by the browser. This can help expose ghosting or rollover limitations, but browser/OS behavior may affect the result.
 
+Press Tab / Shift+Tab to leave the test area. **Clear keyboard results** removes only the keyboard history, current key, and unique / simultaneous-key counts, then marks the keyboard as Not checked. Other results and active tests stay as they are. Focus stays on the clear button; return to the test area to start a fresh check.
+
 For touch screens, place multiple fingers on the test area at once. Device Check shows both the browser-reported `navigator.maxTouchPoints` value and the maximum number of simultaneous contacts actually observed during the session.
 
 ## Publish with GitHub Pages
@@ -123,7 +125,7 @@ Edit `src/index.template.html`; do not edit generated files in `dist/` directly.
 
 The build also produces manifests and size reports used by the template verification workflow.
 
-After intentional source edits, build with `./build-standalone.ps1`, copy `dist/index.html` to `device-check.html`, and run `./scripts/check-repository.ps1`. The check requires Node.js for synthetic media lifecycle and release-parity regressions; it rejects a stale root download. These tests use controlled promises and simulated media resources, never real devices or permissions.
+After intentional source edits, build with `./build-standalone.ps1`, copy `dist/index.html` to `device-check.html`, and run `./scripts/check-repository.ps1`. The check requires Node.js for synthetic media lifecycle, keyboard-result, and release-parity regressions; it rejects a stale root download. These tests use controlled promises, simulated media resources, and a synthetic DOM, never real devices or permissions.
 
 ## Runtime behavior
 
