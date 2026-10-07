@@ -116,7 +116,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Keep the guide visible while active and allow direct step navigation.
 
 ### Shared UX
-- Japanese / English UI in the same HTML.
+- Japanese / English UI in the same HTML. The header shows `EN` in Japanese and `JA` in English, with localized target-language accessible names / tooltips and localized Help / close controls. Preserve the existing header without adding a privacy badge.
 - Light mode only.
 - No runtime network requests.
 - Help dialog explains permissions, secure-context limitations, speaker-test limitation, and privacy.
