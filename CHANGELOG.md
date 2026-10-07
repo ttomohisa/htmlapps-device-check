@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Normalized the header language switch to EN / JA and added current-language target tooltips; retained localized Help / close controls and the existing layout (1.0.1).
+
 - Added a keyboard-only clear-results button with localized navigation/reset guidance and fresh-session behavior.
 - Fixed the keyboard test trapping Tab / Shift+Tab; ordinary test keys remain scoped to the focused test area.
 - Added synthetic keyboard regressions for reset isolation, focus, summary, navigation, repeats, and bilingual copy.

@@ -142,7 +142,19 @@ $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
 
-& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs")
+& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs") (Join-Path $Root "scripts/test-header-language.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Media lifecycle, keyboard result, or release artifact regressions failed." }
+
+$previousHtml = $env:DEVICE_CHECK_HTML
+try {
+  $headerArtifacts = @($app.build.output, 'device-check.html')
+  if ($app.build.selfExtract.enabled) { $headerArtifacts += $app.build.selfExtract.output }
+  foreach ($artifact in $headerArtifacts) {
+    $env:DEVICE_CHECK_HTML = Join-Path $Root $artifact
+    Write-Host "Testing header artifact: $artifact"
+    & node --test (Join-Path $Root "scripts/test-header-language.cjs")
+    if ($LASTEXITCODE -ne 0) { throw "Header language regressions failed: $artifact" }
+  }
+} finally { $env:DEVICE_CHECK_HTML = $previousHtml }
 
 Write-Host "[OK] Repository check passed." -ForegroundColor Green
