@@ -14,7 +14,7 @@ A single-HTML browser utility for checking your camera, microphone, speakers, di
 
 No installation or account is required. Open the app, choose a test, and interact with the device you want to check.
 
-[![Device Check screenshot](assets/screenshot.png)](https://ttomohisa.github.io/htmlapps-device-check/)
+[![Device Check screenshot](assets/screenshot-en.png)](https://ttomohisa.github.io/htmlapps-device-check/)
 
 ## Features
 
@@ -101,6 +101,7 @@ The generated deployment artifact is `dist/index.html`.
 ├─ assets/
 │  ├─ favicon.svg                 # App icon asset
 │  ├─ screenshot.png              # Desktop screenshot
+│  ├─ screenshot-en.png           # English desktop screenshot
 │  └─ screenshot-mobile.png       # Mobile screenshot
 ├─ app.config.json                # App metadata
 ├─ dependencies.json              # Runtime dependency manifest
