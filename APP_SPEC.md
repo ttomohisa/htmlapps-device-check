@@ -199,3 +199,7 @@ Direct `file://` opening is required for the application shell and non-permissio
 - **Heavy async phases:** not applicable; permission-gated tests use untested → checking → checked / needs-attention / unsupported.
 - **Bilingual UI:** required.
 - **Network test:** intentionally excluded because it conflicts with the no-runtime-network privacy boundary.
+
+## Brand icon consistency
+
+- Brand backgrounds use #16624f with corner radii equal to exactly 25% of each background axis. Preserve foreground artwork, placement, and existing canvas padding across SVG assets, app headers, and embedded favicons.

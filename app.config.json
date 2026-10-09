@@ -3,7 +3,7 @@
   "name": "Device Check",
   "nameJa": "Device Check",
   "slug": "device-check",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A browser utility for checking camera, microphone, speakers, display, keyboard, pointer, gamepad, and motion sensors.",
   "descriptionJa": "カメラ、マイク、スピーカー、画面、キーボード、ポインター、ゲームパッド、モーションセンサーをブラウザーだけで確認する端末診断ツールです。",
   "defaultLanguage": "auto",
