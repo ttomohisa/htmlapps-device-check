@@ -2,7 +2,7 @@
 
 ## 1.0.2 - 2026-10-09
 
-- Prepare the maintenance build for an English catalog screenshot, preserving app behavior and the supplied icon.
+- Add a real English catalog screenshot and use it in the English README, preserving app behavior and the supplied icon.
 
 ## Unreleased
 
