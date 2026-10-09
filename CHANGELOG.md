@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 - 2026-10-09
+
+- Prepare the maintenance build for an English catalog screenshot, preserving app behavior and the supplied icon.
+
 ## Unreleased
 
 - Normalized the header language switch to EN / JA and added current-language target tooltips; retained localized Help / close controls and the existing layout (1.0.1).
