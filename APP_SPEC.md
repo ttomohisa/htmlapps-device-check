@@ -120,6 +120,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Light mode only.
 - No runtime network requests.
 - Help dialog explains permissions, secure-context limitations, speaker-test limitation, and privacy.
+- While the native Help modal is open, lock background scrolling on both the document root and body. Keep the existing bounded dialog shell and independently scrolling Help content; Close, Escape, and backdrop dismissal retain their native behavior.
 - Test status states: untested, checking, checked, needs attention, unsupported.
 - No test result persistence; only language preference may use localStorage.
 
@@ -187,6 +188,8 @@ Direct `file://` opening is required for the application shell and non-permissio
 - Gamepad haptics and motion tests fail gracefully when unsupported.
 - `assets/favicon.svg` matches the embedded favicon / header visual concept.
 - Japanese and English copy fits the mobile layout without horizontal overflow.
+- Help keeps the background page still while its content scrolls. Closing Help restores normal page scrolling; the close control and final notes remain reachable at narrow, short viewport sizes in both languages.
+- The canonical checker runs Help modal CSS/copy contracts on the source, readable release, root download, and decoded self-extract release. Native scrolling, geometry, and focus behavior still require browser verification.
 - On smartphones, the fixed bottom navigation remains reachable with safe-area padding, only the selected test group is visible, tap targets remain comfortable, and the guided quick check can be dismissed without losing access to it.
 
 ## 11. Explicit decisions

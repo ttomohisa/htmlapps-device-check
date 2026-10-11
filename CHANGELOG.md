@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 - 2026-10-11
+
+- Lock document and body background scrolling while the native Help modal is open, preserving its existing scrollable content and close controls.
+- Add matching Japanese/English Help guidance and regression contracts for source and all release variants.
+
 ## 1.0.3 - 2026-10-09
 
 - Normalize brand icon backgrounds to #16624f with exact 25% corner radii across SVG assets, header icons, and embedded favicons, preserving existing artwork.

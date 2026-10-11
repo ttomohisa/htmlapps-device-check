@@ -45,6 +45,10 @@ No Python, Node.js, or local web server is required to use the generated HTML.
 
 ## Usage
 
+### Help
+
+Open Help in the upper-right corner for instructions and limitations. While it is open, the background page stays still and the Help content scrolls independently. Return with Close, Esc, or a click outside the dialog.
+
 ### Quick pre-call check
 
 1. Start **Pre-call Quick Check**.
@@ -126,7 +130,7 @@ Edit `src/index.template.html`; do not edit generated files in `dist/` directly.
 
 The build also produces manifests and size reports used by the template verification workflow.
 
-After intentional source edits, build with `./build-standalone.ps1`, copy `dist/index.html` to `device-check.html`, and run `./scripts/check-repository.ps1`. The check requires Node.js for synthetic media lifecycle, keyboard-result, and release-parity regressions; it rejects a stale root download. These tests use controlled promises, simulated media resources, and a synthetic DOM, never real devices or permissions.
+After intentional source edits, build with `./build-standalone.ps1`, copy `dist/index.html` to `device-check.html`, and run `./scripts/check-repository.ps1`. The check requires Node.js for synthetic media lifecycle, keyboard-result, release-parity, header-language, and Help modal regressions; it rejects a stale root download. Help CSS/copy contracts also run against the readable release, root download, and decoded self-extract release. These tests use controlled promises, simulated media resources, a synthetic DOM, and static contracts, never real devices or permissions. Browser scrolling, dialog geometry, and focus still need a separate browser check.
 
 ## Runtime behavior
 
