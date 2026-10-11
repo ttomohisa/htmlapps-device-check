@@ -26,6 +26,10 @@ dist/build-size-report.json    Generated size and embedded-asset storage report
 
 The starter includes the canonical confirmation and toast APIs in the default source, while `components/` also carries the mobile bottom bar, compact popover, preset/custom setting field, and async source-state guard. Reversible operations should normally use Toast + Undo; irreversible/high-risk operations use `AppConfirm`. See `docs/COMPONENTS.md`.
 
+### Help modal scrolling
+
+Device Check's native Help modal uses `html:has(dialog:modal)` and `body:has(dialog:modal)` to lock background scrolling only while a modal is present. The existing dialog shell, internal scroll body, and close handlers are unchanged. This avoids JavaScript scroll-lock state that could become stale after Escape or backdrop dismissal. `scripts/test-help-modal-scroll.cjs` checks the CSS and bilingual Help contracts on source and release variants; browser geometry, wheel scrolling, and native focus restoration require separate verification.
+
 ## Build pipeline
 
 1. Read `app.config.json` and `dependencies.json`.

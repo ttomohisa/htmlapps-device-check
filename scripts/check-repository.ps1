@@ -142,18 +142,18 @@ $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
 
-& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs") (Join-Path $Root "scripts/test-header-language.cjs")
-if ($LASTEXITCODE -ne 0) { throw "Media lifecycle, keyboard result, or release artifact regressions failed." }
+& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs") (Join-Path $Root "scripts/test-header-language.cjs") (Join-Path $Root "scripts/test-help-modal-scroll.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Media lifecycle, keyboard result, release artifact, header language, or Help modal regressions failed." }
 
 $previousHtml = $env:DEVICE_CHECK_HTML
 try {
-  $headerArtifacts = @($app.build.output, 'device-check.html')
-  if ($app.build.selfExtract.enabled) { $headerArtifacts += $app.build.selfExtract.output }
-  foreach ($artifact in $headerArtifacts) {
+  $uiArtifacts = @($app.build.output, 'device-check.html')
+  if ($app.build.selfExtract.enabled) { $uiArtifacts += $app.build.selfExtract.output }
+  foreach ($artifact in $uiArtifacts) {
     $env:DEVICE_CHECK_HTML = Join-Path $Root $artifact
-    Write-Host "Testing header artifact: $artifact"
-    & node --test (Join-Path $Root "scripts/test-header-language.cjs")
-    if ($LASTEXITCODE -ne 0) { throw "Header language regressions failed: $artifact" }
+    Write-Host "Testing header and Help artifact: $artifact"
+    & node --test (Join-Path $Root "scripts/test-header-language.cjs") (Join-Path $Root "scripts/test-help-modal-scroll.cjs")
+    if ($LASTEXITCODE -ne 0) { throw "Header language or Help modal regressions failed: $artifact" }
   }
 } finally { $env:DEVICE_CHECK_HTML = $previousHtml }
 
