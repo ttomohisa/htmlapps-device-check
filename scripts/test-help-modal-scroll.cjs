@@ -36,7 +36,7 @@ test('Help retains its existing bounded shell and independently scrolling conten
   assert.match(html, /<button[^>]*id="closeHelpButton"[^>]*type="button"/);
 });
 
-test('Japanese and English Help explain background locking and existing ways to close', () => {
+test('Japanese and English Help explain existing ways to close without layout audit prose', () => {
   const help = html.match(/<!-- APP:HELP:BEGIN -->([\s\S]*?)<!-- APP:HELP:END -->/);
   assert.ok(help, 'Help content must stay in its source region');
   assert.match(help[1], /data-i18n="helpDialogUse"/);
@@ -45,8 +45,8 @@ test('Japanese and English Help explain background locking and existing ways to 
   const end = html.indexOf('    const $=');
   assert.ok(start >= 0 && end > start, 'Real translations must be present');
   vm.runInContext(html.slice(start, end) + '\nthis.copy=translations;', context);
-  assert.match(context.copy.ja.helpDialogUse, /背景.*スクロール/);
+  assert.doesNotMatch(context.copy.ja.helpDialogUse, /背景.*スクロール/);
   assert.match(context.copy.ja.helpDialogUse, /閉じる.*Esc.*外側/);
-  assert.match(context.copy.en.helpDialogUse, /background.*scroll/i);
+  assert.doesNotMatch(context.copy.en.helpDialogUse, /background.*scroll/i);
   assert.match(context.copy.en.helpDialogUse, /Close.*Esc.*outside/i);
 });
