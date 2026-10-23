@@ -55,7 +55,7 @@ async function main() {
             assert.ok(finalBox && bodyBox && finalBox.y >= 0 && finalBox.y + finalBox.height <= height && finalBox.y >= bodyBox.y - 1 && finalBox.y + finalBox.height <= bodyBox.y + bodyBox.height + 1, label + ': final Help item reachable');
             assert.ok(await body.evaluate(el => el.scrollWidth <= el.clientWidth + 1), label + ': Help width');
             const headerBox = await page.locator('#helpDialog .dialog-header').boundingBox();
-            assert.ok(headerBox && headerBox.y >= 0 && headerBox.y + headerBox.height <= height, label + ': header visible');
+            assert.ok(headerBox && headerBox.x >= 0 && headerBox.x + headerBox.width <= width && headerBox.y >= 0 && headerBox.y + headerBox.height <= height, label + ': header visible');
             if (file === 'dist/index.html' && [1360, 320].includes(width)) {
               await page.screenshot({ path: path.join(results, `help-${language}-${width}.png`) });
             }

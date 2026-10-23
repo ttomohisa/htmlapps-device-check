@@ -23,3 +23,9 @@ test('keyboard disclosure activation is not mistaken for backdrop',{timeout:1000
  const dialog={closed:0,getBoundingClientRect(){return{left:20,right:300,top:20,bottom:400}},close(){this.closed++}};
  const run=new Function('helpDialog','e',handler);run(dialog,{target:{},clientX:0,clientY:0});assert.equal(dialog.closed,0);run(dialog,{target:dialog,clientX:0,clientY:0});assert.equal(dialog.closed,1);
 });
+
+test('Help allocates scroll space without clipping its header',()=>{
+ assert.match(html,/#helpDialog\[open\]\{display:flex;flex-direction:column\}/);
+ assert.match(html,/#helpDialog \.dialog-header\{flex:0 0 auto\}/);
+ assert.match(html,/#helpDialog \.dialog-body\{min-height:0;flex:1 1 auto;max-height:none;overflow:auto;overscroll-behavior:contain\}/);
+});
