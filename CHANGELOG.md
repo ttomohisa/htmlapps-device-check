@@ -16,6 +16,7 @@
 
 ## Unreleased
 
+- Move build information to the end of Help while preserving existing smartphone visibility.
 - Normalized the header language switch to EN / JA and added current-language target tooltips; retained localized Help / close controls and the existing layout (1.0.1).
 
 - Added a keyboard-only clear-results button with localized navigation/reset guidance and fresh-session behavior.

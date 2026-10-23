@@ -206,3 +206,7 @@ Direct `file://` opening is required for the application shell and non-permissio
 ## Brand icon consistency
 
 - Brand backgrounds use #16624f with corner radii equal to exactly 25% of each background axis. Preserve foreground artwork, placement, and existing canvas padding across SVG assets, app headers, and embedded favicons.
+
+## Build information placement
+
+Keep existing build metadata at the very end of How to use & Notes, not the main page. Preserve the existing smartphone footer breakpoint and any existing mobile build hiding. Native disclosure keyboard activation must not dismiss Help.
