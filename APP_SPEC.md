@@ -214,3 +214,9 @@ Keep existing build metadata at the very end of How to use & Notes, not the main
 ## Header visibility
 
 Keep the header version visible on narrow smartphones without overlapping the app name or language/Help controls. Verify Japanese and English at 320px, 360px, 390px and desktop widths.
+
+## Common UI recovery
+
+- The work area explains that diagnostics are session-only; existing language and quick-check visibility preferences remain the only local storage. Failed visibility read/write recovery keeps live choices and never writes defaults on read Retry.
+- Canonical language priority is URL, shared browser setting, legacy tool setting, browser preference. Startup is read-only; failed explicit switching shows screen-only notice.
+- Camera/microphone retain operation-owned capture cleanup. Motion permission has a generation through Stop/page exit; test-tone and haptic requests prevent duplicate execution and retain localized retry guidance. Numeric hardware calculations, tones and display patterns are unchanged.

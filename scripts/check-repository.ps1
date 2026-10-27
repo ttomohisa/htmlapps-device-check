@@ -142,7 +142,7 @@ $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
 
-& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs") (Join-Path $Root "scripts/test-header-language.cjs") (Join-Path $Root "scripts/test-help-modal-scroll.cjs")
+& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs") (Join-Path $Root "scripts/test-header-language.cjs") (Join-Path $Root "scripts/test-help-modal-scroll.cjs") (Join-Path $Root "scripts/test-shared-ui.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Media lifecycle, keyboard result, release artifact, header language, or Help modal regressions failed." }
 
 $previousHtml = $env:DEVICE_CHECK_HTML
@@ -152,7 +152,7 @@ try {
   foreach ($artifact in $uiArtifacts) {
     $env:DEVICE_CHECK_HTML = Join-Path $Root $artifact
     Write-Host "Testing header and Help artifact: $artifact"
-    & node --test (Join-Path $Root "scripts/test-header-language.cjs") (Join-Path $Root "scripts/test-help-modal-scroll.cjs")
+    & node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-header-language.cjs") (Join-Path $Root "scripts/test-help-modal-scroll.cjs") (Join-Path $Root "scripts/test-shared-ui.cjs")
     if ($LASTEXITCODE -ne 0) { throw "Header language or Help modal regressions failed: $artifact" }
   }
 } finally { $env:DEVICE_CHECK_HTML = $previousHtml }
@@ -172,3 +172,9 @@ foreach ($HelpArtifact in @("src/index.template.html", "dist/index.html", "dist/
 # Header icons and version visibility across source and generated releases.
 & node (Join-Path $Root "scripts/test-header-ui.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Header UI regression failed." }
+
+& node (Join-Path $Root "scripts/test-common-ui.cjs")
+if($LASTEXITCODE -ne 0){throw "Common UI checks failed"}
+
+& node --test (Join-Path $Root "tests/mobile-build-info.test.cjs")
+if($LASTEXITCODE -ne 0){throw "Terminal Help build metadata check failed"}

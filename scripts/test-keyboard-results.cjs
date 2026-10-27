@@ -5,7 +5,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const test = require('node:test');
-const html = fs.readFileSync(process.env.DEVICE_CHECK_HTML || path.join(__dirname, '../src/index.template.html'), 'utf8');
+let html = fs.readFileSync(process.env.DEVICE_CHECK_HTML || path.join(__dirname, '../src/index.template.html'), 'utf8');
+const payload=html.match(/<script id="self-extract-payload"[^>]*>([^<]+)<\/script>/);if(payload)html=require('node:zlib').gunzipSync(Buffer.from(payload[1],'base64')).toString();
 const lines = html.split('\n');
 const line = prefix => lines.find(value => value.startsWith(prefix)) || '';
 const translations = html.slice(html.indexOf('    const translations='), html.indexOf('    const $='));
@@ -46,7 +47,7 @@ function harness() {
   };
   const $$ = selector => selector==='[data-i18n]' ? localized : selector.startsWith('[data-status-for=') ? statuses.filter(n=>n.dataset.statusFor===selector.match(/"([^"]+)"/)[1]) : [];
   document.createElement=makeNode;
-  const context=vm.createContext({JSON,document,$,$$,CSS:{escape:value=>value},APP_CONFIG:{name:'Device Check',nameJa:'端末チェック'},updateEnvironment(){},renderCapabilities(){},updateQuickDiagnosis(){},updateGamepadHapticState(){},renderMediaState(){}});
+  const context=vm.createContext({syncSharedUi(){},renderSensorState(){},JSON,document,$,$$,CSS:{escape:value=>value},APP_CONFIG:{name:'Device Check',nameJa:'端末チェック'},updateEnvironment(){},renderCapabilities(){},updateQuickDiagnosis(){},updateGamepadHapticState(){},renderMediaState(){}});
   vm.runInContext(translations+"\nlet language='en';\n"+state+'\n'+line('    const keyboardLayout=')+'\n'+functions+'\n'+bindings+`
     this.api={snapshot:()=>JSON.parse(JSON.stringify({unique:[...uniqueKeys],pressed:[...pressedKeys],max:maxSimultaneousKeys,testState,mediaState,maxObservedTouches,activePointers:[...activePointers],micPeak,sensorListening,quickIndex})),setStatus,changeLanguage(value){language=value;applyLanguage()},primeOtherTests(){
       ['camera','speaker','screen','pointer','gamepad','sensor'].forEach(test=>setStatus(test,'pass'));setStatus('mic','active');

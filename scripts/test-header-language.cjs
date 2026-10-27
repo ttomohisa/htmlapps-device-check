@@ -34,11 +34,12 @@ function harness({ language = 'en', stored, storageUnavailable = false } = {}) {
   const document = { documentElement: {} };
   const $ = selector => { assert.ok(ids.has(selector), `Missing ${selector}`); return ids.get(selector); };
   const $$ = selector => { const attr = selector.match(/^\[([^\]]+)\]$/)?.[1]; assert.ok(attr, selector); return nodes.filter(n => attr in n.attributes); };
-  const context = vm.createContext({ document, $, $$, navigator: { language },
+  const context = vm.createContext({syncSharedUi(){},renderSensorState(){},uiLanguageSessionOnly:false,uiPreferenceReadFailed:false,URL,document, $, $$, navigator: { language },
     APP_CONFIG: { slug: 'device-check', name: 'Device Check', nameJa: 'Device Check', defaultLanguage: 'auto' },
     localStorage: { getItem(key) { if (storageUnavailable) throw Error('Unavailable'); return storage.get(key) ?? null; }, setItem(key, value) { if (storageUnavailable) throw Error('Unavailable'); storage.set(key, value); } },
     testState: {}, updateEnvironment() {}, renderCapabilities() {}, renderKeyboardMap() {}, updateQuickDiagnosis() {}, updateGamepadHapticState() {}, renderMediaState() {}
   });
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../components/ui-conventions.js'),'utf8'),context);
   vm.runInContext(html.slice(html.indexOf('    const translations='), html.indexOf('    const $=')) + '\n' +
     ['readStorage', 'writeStorage', 'detectLanguage', 't', 'applyLanguage'].map(name => line('    function ' + name + '(')).join('\n') + '\n' +
     line('    const storageKey=') + '\n' + line('    let language=') + '\n' +
@@ -67,7 +68,7 @@ for (const language of ['ja', 'en']) {
       assertHeader(h, current);
       h.$('#languageButton').click();
       current = current === 'ja' ? 'en' : 'ja';
-      assert.equal(h.storage.get('device-check:language'), current);
+      assert.equal(h.storage.get('browser-kitty:ui-language:v1'), current);
       assertHeader(harness({ stored: current }), current);
     }
   });

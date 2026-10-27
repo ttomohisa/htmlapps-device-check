@@ -293,6 +293,8 @@ $manifest = [ordered]@{
 
 Write-Step "Generating standalone HTML"
 $template = [System.IO.File]::ReadAllText($TemplatePath, [System.Text.Encoding]::UTF8)
+. (Join-Path $Root "scripts/embed-ui-conventions.ps1")
+$template = Expand-BrowserKittyUI -Template $template -ComponentsPath (Join-Path $Root "components")
 $assetBundleJson = ConvertTo-SafeJson $assetBundle 50
 $replacements = [ordered]@{
   "__APP_CONFIG_JSON__" = ConvertTo-SafeJson $appConfig 20
@@ -414,3 +416,5 @@ Write-Host "[OK] Runtime network access is blocked by CSP."
 if ($selfExtractEnabled) {
   Write-Host "[OK] Self-extracting HTML: $selfExtractOutputPath" -ForegroundColor Green
 }
+
+Copy-Item -LiteralPath $OutputPath -Destination (Join-Path $Root "device-check.html")

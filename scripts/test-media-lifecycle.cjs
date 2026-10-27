@@ -6,12 +6,13 @@ const path = require('node:path');
 const vm = require('node:vm');
 const nodeTest = require('node:test');
 const test = (name, fn) => nodeTest(name, { timeout: 1000 }, fn);
-const html = fs.readFileSync(process.env.DEVICE_CHECK_HTML || path.join(__dirname, '../src/index.template.html'), 'utf8');
+let html = fs.readFileSync(process.env.DEVICE_CHECK_HTML || path.join(__dirname, '../src/index.template.html'), 'utf8');
+const payload=html.match(/<script id="self-extract-payload"[^>]*>([^<]+)<\/script>/);if(payload)html=require('node:zlib').gunzipSync(Buffer.from(payload[1],'base64')).toString();
 const translations = html.slice(html.indexOf('    const translations='), html.indexOf('    const $='));
 const state = html.slice(html.indexOf('    const testState='), html.indexOf('    const uniqueKeys='));
 const actualFunctions = html.slice(html.indexOf('    function friendlyMediaError('), html.indexOf('    async function playTone(')) + '\n' + ['t','setStatus','updateSummary','applyLanguage'].map(name=>html.split('\n').find(line=>line.startsWith('    function '+name+'('))).join('\n');
 const bindings = html.split('\n').filter(line=>line.includes("$('#cameraStart').addEventListener")||line.includes("$('#micStart').addEventListener")).join('\n');
-const pagehide = html.split('\n').find(line=>line.includes("addEventListener('pagehide',()=>{stopCamera()"));
+const pagehide = html.split('\n').find(line=>line.includes("addEventListener('pagehide',()=>{")&&line.includes('stopCamera()'));
 const deferred = () => { let resolve, reject; const promise = new Promise((a,b) => { resolve=a;reject=b; }); return {promise,resolve,reject}; };
 const tick = async () => { for(let i=0;i<15;i++) await Promise.resolve(); };
 const error = name => Object.assign(new Error('Synthetic '+name), {name});
@@ -26,7 +27,7 @@ function harness(config={}) {
     if(nodes.has(id))return nodes.get(id);
     const classes=new Set();
     const n={id,value:'',textContent:'',style:{},dataset:{},disabled: /Stop$/.test(id),options:[],srcObject:null,clientWidth:720,clientHeight:118,listeners:{},addEventListener(type,fn){this.listeners[type]=fn},
-      classList:{add:c=>classes.add(c),remove:c=>classes.delete(c),contains:c=>classes.has(c),toggle(c,on){on?classes.add(c):classes.delete(c)}},setAttribute(k,v){this[k]=v},pause(){},
+      classList:{add:c=>classes.add(c),remove:c=>classes.delete(c),contains:c=>classes.has(c),toggle(c,on){on?classes.add(c):classes.delete(c)}},setAttribute(k,v){this[k]=v},removeAttribute(k){delete this[k]},pause(){},
       play:()=>config.play?config.play():Promise.resolve(),
       append(o){this.options.push(o)},getContext(){return {clearRect(){},fillRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){}}}};
     Object.defineProperty(n,'innerHTML',{set(){n.options=[]}});nodes.set(id,n);return n;
@@ -41,7 +42,7 @@ function harness(config={}) {
     createChannelSplitter(){return this.makeNode()}
     createGain(){if(config.gainFails)throw error('InvalidStateError');return this.makeNode({gain:{value:1}})}
   }
-  const ctx=vm.createContext({console,Float32Array,Intl,devicePixelRatio:1,
+  const ctx=vm.createContext({console,Float32Array,Intl,devicePixelRatio:1,BrowserKittyUI:require('../components/ui-conventions.js'),syncSharedUi(){},renderSensorState(){},uiToneGeneration:0,uiToneBusy:false,uiHapticGeneration:0,uiHapticBusy:false,
     navigator:{mediaDevices:{getUserMedia(constraints){const d=deferred();requests.push({...d,constraints});return d.promise;},enumerateDevices(){const d=deferred();enums.push(d);if(!config.deferEnumeration){config.enumerationError?d.reject(error(config.enumerationError)):d.resolve([]);}return d.promise;}}},
     window:config.noAudioContext?{}:{AudioContext},
     document:{documentElement:{},createElement:()=>({value:'',textContent:''})},

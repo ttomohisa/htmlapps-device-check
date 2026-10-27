@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Adopt shared UI 1.0.0 with explicit diagnostic retention, common language and durable visibility recovery, native operation states, and owned motion/audio/haptic lifecycles.
+
 ## 1.0.5 - 2026-10-27
 
 - Keep the header version visible on narrow smartphones without overlapping the app name or language/Help controls.

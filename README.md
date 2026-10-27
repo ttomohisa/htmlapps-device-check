@@ -8,6 +8,9 @@
 
 A single-HTML browser utility for checking your camera, microphone, speakers, display, keyboard, pointer/touch input, gamepad, and motion sensors in one place.
 
+
+Diagnostics stay in this tab. Only language and quick-check visibility are remembered; failed preference saves offer retry. Motion Stop also cancels a pending permission request’s ownership, while the browser may keep its permission prompt open.
+
 ## 🚀 Live demo
 
 ### [Open Device Check on GitHub Pages](https://ttomohisa.github.io/htmlapps-device-check/)

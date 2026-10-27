@@ -95,3 +95,7 @@ Keep source in one HTML while it remains understandable. When an app grows subst
 - No runtime external resource.
 - Clear state ownership.
 - A build that fails on missing input.
+
+## Common UI 1.0.0
+
+Exact locked CSS/JS is embedded at build time. App adapters name session-only diagnostics and separate language/quick-visibility preferences, preserve scoped errors and native disabled/busy states. Existing camera/mic lifecycle remains intact; motion permission ownership now extends through Stop/pagehide, and tone/haptic operations have scoped pending guards. No hardware values or test results are persisted.
