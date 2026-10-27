@@ -14,7 +14,7 @@ async function main() {
   try {
     for (const file of ['dist/index.html', 'dist/index.self-extract.html', 'device-check.html']) {
       for (const language of ['ja', 'en']) {
-        for (const [width, height] of [[1360, 900], [601, 568], [600, 568], [360, 640], [320, 568], [393, 252]]) {
+        for (const [width, height] of [[1360, 900], [601, 568], [600, 568], [360, 640], [390, 844], [320, 568], [393, 252]]) {
           const context = await browser.newContext({ viewport: { width, height }, locale: language, reducedMotion: 'reduce' });
           const page = await context.newPage();
           const errors = [], requests = [];
@@ -26,6 +26,10 @@ async function main() {
             await page.goto(pathToFileURL(path.resolve(__dirname, '..', file)).href);
             await page.locator('#helpButton').waitFor();
             if (await page.locator('html').getAttribute('lang') !== language) await page.locator('#languageButton').click();
+ const headerVersion=page.locator('header .version-badge');
+ assert.equal(await headerVersion.isVisible(),true,label+': header version is visible');
+ assert.equal((await headerVersion.textContent()).trim(),'v'+JSON.parse(fs.readFileSync(path.resolve(__dirname,'../app.config.json'),'utf8')).version,label+': current version');
+ assert.ok(await headerVersion.evaluate(el=>{const r=el.getBoundingClientRect();if(r.left<0||r.right>innerWidth||el.scrollWidth>el.clientWidth+1)return false;for(let p=el.parentElement;p;p=p.parentElement){if(/hidden|clip/.test(getComputedStyle(p).overflowX)){const b=p.getBoundingClientRect();if(r.left<b.left-1||r.right>b.right+1)return false;}}return true;}),label+': version is not clipped');
             assert.equal(await page.locator('[data-i18n="localBadge"]').count(), 0, label + ': no invented privacy badge');
             assert.equal(await page.locator('main #buildVersion').count(), 0, label);
             assert.equal(await page.locator('footer').isVisible(), width > 600, label);

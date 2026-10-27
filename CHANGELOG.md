@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5 - 2026-10-27
+
+- Keep the header version visible on narrow smartphones without overlapping the app name or language/Help controls.
+
 ## 1.0.4 - 2026-10-11
 
 - Lock document and body background scrolling while the native Help modal is open, preserving its existing scrollable content and close controls.

@@ -93,8 +93,15 @@
       .build-info{margin-top:16px!important}.build-grid{grid-template-columns:1fr}.app-toast{left:10px;right:10px;bottom:calc(76px + env(safe-area-inset-bottom));max-width:none}.dialog-header{padding:13px 14px}.dialog-body{padding:15px 15px 22px}.dialog-body p,.dialog-body li{font-size:12px}
       footer{padding-left:12px;padding-right:12px;font-size:10px}
     }
-    @media(max-width:380px){.version-badge{display:none}.quick-grid{gap:6px}.quick-card{padding:8px;grid-template-columns:30px minmax(0,1fr)}.quick-icon{width:30px;height:30px}.quick-copy strong{font-size:11px}.cap-grid{grid-template-columns:1fr}.summary-score strong{font-size:22px}.screen-actions{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:380px){.quick-grid{gap:6px}.quick-card{padding:8px;grid-template-columns:30px minmax(0,1fr)}.quick-icon{width:30px;height:30px}.quick-copy strong{font-size:11px}.cap-grid{grid-template-columns:1fr}.summary-score strong{font-size:22px}.screen-actions{grid-template-columns:repeat(2,1fr)}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+    @media (max-width: 600px) {
+      .brand-name { display: flex; align-items: center; }
+      .brand-name > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+      .version-badge { flex: 0 0 auto; white-space: nowrap; }
+      .header-actions { flex: 0 0 auto; }
+    }
   </style>
 </head>
 <body data-mobile-page="home">
@@ -102,7 +109,7 @@
     <div class="header-inner">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><rect x="11.5" y="13.5" width="41" height="29" rx="5" stroke="currentColor" stroke-width="4"/><path d="M17.5 29h8l4-8 6.5 15 4.5-8h6" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 50.5h12M32 42.5v8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></div>
-        <div class="brand-copy"><p class="brand-name"><span id="brandName">Device Check</span><span class="version-badge" id="versionBadge">v1.0</span></p><p class="brand-meta" data-i18n="brandMeta">端末の入出力をブラウザーだけで診断</p></div>
+        <div class="brand-copy"><p class="brand-name"><span id="brandName">Device Check</span><span class="version-badge" id="versionBadge">v1.0.5</span></p><p class="brand-meta" data-i18n="brandMeta">端末の入出力をブラウザーだけで診断</p></div>
       </div>
       <div class="header-actions">
         <button class="language-button" id="languageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え">EN</button>
@@ -226,8 +233,8 @@
   <script>
   (() => {
     'use strict';
-    const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Device Check","nameJa":"Device Check","slug":"device-check","version":"1.0.4","description":"A browser utility for checking camera, microphone, speakers, display, keyboard, pointer, gamepad, and motion sensors.","descriptionJa":"カメラ、マイク、スピーカー、画面、キーボード、ポインター、ゲームパッド、モーションセンサーをブラウザーだけで確認する端末診断ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-device-check"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
-    const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.0","generatedAtUtc":"2026-10-23T10:27:38.9393782Z","app":{"name":"Device Check","slug":"device-check","version":"1.0.4"},"dependencies":[]};
+    const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Device Check","nameJa":"Device Check","slug":"device-check","version":"1.0.5","description":"A browser utility for checking camera, microphone, speakers, display, keyboard, pointer, gamepad, and motion sensors.","descriptionJa":"カメラ、マイク、スピーカー、画面、キーボード、ポインター、ゲームパッド、モーションセンサーをブラウザーだけで確認する端末診断ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-device-check"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
+    const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.0","generatedAtUtc":"2026-10-27T03:15:28.5505446Z","app":{"name":"Device Check","slug":"device-check","version":"1.0.5"},"dependencies":[]};
     const assetBundle = JSON.parse(document.getElementById('embedded-asset-bundle').textContent || '{"dependencies":{}}');
     const assetByteCache = new Map();
     const blobUrls = new Set();
