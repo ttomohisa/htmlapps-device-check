@@ -210,3 +210,7 @@ Direct `file://` opening is required for the application shell and non-permissio
 ## Build information placement
 
 Keep existing build metadata at the very end of How to use & Notes, not the main page. Preserve the existing smartphone footer breakpoint and any existing mobile build hiding. Native disclosure keyboard activation must not dismiss Help.
+
+## Header visibility
+
+Keep the header version visible on narrow smartphones without overlapping the app name or language/Help controls. Verify Japanese and English at 320px, 360px, 390px and desktop widths.
