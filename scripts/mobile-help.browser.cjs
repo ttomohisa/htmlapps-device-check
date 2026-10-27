@@ -37,6 +37,7 @@ async function main() {
 
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), label + ': page width');
 
+if(file==='dist/index.html'&&[320,360,390,1360].includes(width))await page.screenshot({path:path.join(results,`main-${language}-${width}.png`)});
             await page.locator('#helpButton').click();
             const body = page.locator('#helpDialog .dialog-body');
             assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
