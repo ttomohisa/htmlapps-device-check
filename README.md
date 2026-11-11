@@ -18,10 +18,10 @@ No installation or account is required. Open the app, choose a test, and interac
 
 ## Features
 
-- **Run a quick pre-call check** — Step through camera, microphone, and speaker checks before a meeting. Hide the guide when you do not need it; that display preference is remembered locally.
+- **Run a quick pre-call check** — Step through camera, microphone, and speaker checks before a meeting. On phones, the guide remains visible on the Camera & Audio tab while a check is active. Only verified steps count toward the result; missing or failed checks are reported as incomplete. Hide the guide when you do not need it; that display preference is remembered locally.
 - **Inspect camera and microphone behavior** — Preview the selected camera and see reported resolution, FPS, facing mode, microphone level, waveform, peak, rolling noise floor, channel levels, and audio settings.
 - **Test speakers by channel** — Play locally generated center, left, and right tones and record whether each output was audible.
-- **Check display behavior full-screen** — Use solid colors, gradients, gray steps, checkerboards, 1 px lines, RGB ramps, image-retention patterns, and motion tests for visual inspection.
+- **Check display behavior full-screen** — Use solid colors, gradients, gray steps, checkerboards, 1 px lines, RGB ramps, image-retention patterns, and motion tests for visual inspection. Confirm Looks OK or Issue noticed after viewing a pattern; closing without an answer keeps the previous result.
 - **Check keyboard and touch input in real time** — See `key`, `code`, modifiers, simultaneous key presses, a visual key map, pointer coordinates, pressure, pointer type, and observed multi-touch count.
 - **Inspect gamepads and motion sensors** — View buttons and axes live, try weak/strong haptics on supported controllers, and inspect orientation or motion values where available.
 - **See browser capability support** — Review availability for related APIs such as WebGL, WebGPU, WebCodecs, MediaRecorder, Gamepad, and sensor APIs.
@@ -55,7 +55,7 @@ Open Help in the upper-right corner for instructions and limitations. While it i
 2. Check the camera preview and mark the camera step complete.
 3. Start the microphone test, speak normally, and confirm that the level and waveform react.
 4. Play the speaker test tones and confirm the outputs you can hear.
-5. Finish the guide or switch back to any individual test at any time.
+5. Finish the guide or switch back to any individual test at any time. An unverified step makes the final outcome incomplete rather than successful.
 
 ### Individual tests
 
@@ -72,11 +72,11 @@ The main screen provides dedicated tests for:
 | Gamepad | Buttons, axes, connected controller data, supported vibration tests |
 | Motion | Device orientation and motion values when exposed by the browser |
 
-The device summary at the top tracks which diagnostic sections have been checked during the current session.
+The device summary at the top counts only tests verified as passed during the current session. Warnings and denied permissions do not count as confirmed passes.
 
 ### Display test notes
 
-Display patterns are visual checks, not color calibration. Full-screen mode makes dead-pixel, banding, line, retention, and motion inspection easier, but the results still depend on the display, browser rendering, scaling, and your own visual judgment.
+Display patterns are visual checks, not color calibration. Full-screen mode makes dead-pixel, banding, line, retention, and motion inspection easier, but the results still depend on the display, browser rendering, scaling, and your own visual judgment. Select **Looks OK** or **Issue noticed** to record a result; closing a pattern without a choice does not mark it checked. The 60fps reference uses elapsed time rather than assuming a specific display refresh rate.
 
 ### Keyboard and multi-touch checks
 
@@ -150,7 +150,7 @@ The app does not need a backend for its diagnostics. The generated page includes
 - Browsers cannot automatically determine whether a speaker tone was physically audible, so speaker results require user confirmation.
 - Display tests are visual inspection tools and are not a substitute for a colorimeter or professional display calibration.
 - Gamepad haptics vary by browser, controller, connection method, and operating system.
-- Motion and orientation APIs are restricted or require an extra permission gesture on some mobile browsers.
+- Motion and orientation APIs are restricted or require an extra permission gesture on some mobile browsers. Device Check requests both available iOS sensor permissions in the original user gesture; Stop invalidates an outstanding request even if the browser prompt remains open.
 - Keyboard ghosting and rollover results may be affected by browser and OS key handling.
 - Network speed testing is intentionally not included.
 
