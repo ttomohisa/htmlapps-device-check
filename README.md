@@ -143,7 +143,7 @@ After intentional source edits, build with `./build-standalone.ps1`, copy `dist/
 
 Camera and microphone access starts only after the corresponding test is started. When a previously selected input device can no longer satisfy the requested constraint, Device Check automatically retries with the browser's default device instead of stopping on an `OverconstrainedError`.
 
-While a camera or microphone is starting, Start is disabled and Stop is available immediately. Changing the selected input replaces the pending or live attempt. Stop and leaving the page invalidate pending work; any late input is released. Stop may not dismiss the browser's permission prompt. A "Checked" result remains a session result after Stop; the hint states that capture has stopped.
+While a camera or microphone is starting, Start is disabled and Stop is available immediately. Changing the selected input replaces the pending or live attempt. Stop and leaving the page invalidate pending work; any late input is released. Stop may not dismiss the browser's permission prompt. A "Checked" result remains a session result after an intentional Stop; the hint states that capture has stopped. If the input track instead ends unexpectedly while the guided quick check is active, that step is changed to Needs attention and removed from the guided completed count.
 
 If preview playback or microphone audio setup fails, resources are released and Start lets you retry. Web Audio support is checked before microphone permission is requested. If only the device list fails, the current input stays active and stoppable, with a retry hint.
 
@@ -156,7 +156,7 @@ The app does not need a backend for its diagnostics. The generated page includes
 - Some device APIs require HTTPS and may be unavailable when `dist/index.html` is opened directly with `file://`.
 - Browsers cannot automatically determine whether a speaker tone was physically audible, so speaker results require user confirmation.
 - Display tests are visual inspection tools and are not a substitute for a colorimeter or professional display calibration.
-- Gamepad haptics vary by browser, controller, connection method, and operating system. Gamepads are counted as checked only after a button press or meaningful stick movement; blocked Gamepad APIs cannot prevent other tests from loading.
+- Gamepad haptics vary by browser, controller, connection method, and operating system. Gamepads are counted as checked only after a button press or meaningful stick movement; blocked Gamepad APIs cannot prevent other tests from loading. If the browser restores this page from its back/forward cache, connected gamepad polling resumes automatically; a disconnected controller is no longer displayed as active.
 - Motion and orientation APIs are restricted or require an extra permission gesture on some mobile browsers. Device Check requests both available iOS sensor permissions in the original user gesture; Stop invalidates an outstanding request even if the browser prompt remains open.
 - Keyboard ghosting and rollover results may be affected by browser and OS key handling.
 - Network speed testing is intentionally not included.
