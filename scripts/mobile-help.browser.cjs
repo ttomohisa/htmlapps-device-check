@@ -42,6 +42,16 @@ if(file==='dist/index.html'&&[320,360,390,1360].includes(width))await page.scree
             const body = page.locator('#helpDialog .dialog-body');
             assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
             assert.equal(await page.locator(buildSelector).count(), 1, label);
+            console.log('HELP_DIAG ' + label + ' ' + JSON.stringify(await page.evaluate(() => {
+              const dialog = document.querySelector('#helpDialog');
+              const build = document.querySelector('details.build-info');
+              const scripts = [...document.scripts].length;
+              const style = getComputedStyle(build);
+              const rect = build.getBoundingClientRect();
+              return { dialogOpen: dialog.open, dialogStyle: getComputedStyle(dialog).display,
+                buildDisplay: style.display, buildVisibility: style.visibility, buildRect: [rect.x, rect.y, rect.width, rect.height],
+                scripts, language: document.documentElement.lang };
+            })) + ' errors=' + JSON.stringify(errors));
             assert.equal(await page.locator(buildSelector).isVisible(), true, label);
             for (const id of ['buildVersion', 'builtAt', 'dependencyCount']) assert.equal(await page.locator('#' + id).count(), 1, label);
 
