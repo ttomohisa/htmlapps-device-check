@@ -37,7 +37,25 @@ async function main() {
 
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), label + ': page width');
 
-if(file==='dist/index.html'&&[320,360,390,1360].includes(width))await page.screenshot({path:path.join(results,`main-${language}-${width}.png`)});
+if (file === 'dist/index.html' && [320, 360, 390, 1360].includes(width)) {
+              if (width <= 600) await page.locator('[data-mobile-nav="media"]').click();
+              const centered = await page.locator('#cameraPreview').evaluate(preview => {
+                const bounds = preview.getBoundingClientRect();
+                const children = [...preview.querySelector('.preview-placeholder').children].map(child => child.getBoundingClientRect());
+                const top = Math.min(...children.map(rect => rect.top));
+                const bottom = Math.max(...children.map(rect => rect.bottom));
+                const mid = (top + bottom) / 2;
+                const center = (bounds.top + bounds.bottom) / 2;
+                const style = getComputedStyle(preview.querySelector('.preview-placeholder'));
+                return { difference: Math.abs(mid - center), position: style.position,
+                  withinBounds: top >= bounds.top - 1 && bottom <= bounds.bottom + 1 };
+              });
+              assert.equal(centered.position, 'absolute', label + ': idle message overlays video instead of adding a grid row');
+              assert.ok(centered.withinBounds && centered.difference < 8,
+                label + ': idle icon and message centered in the camera preview (' + JSON.stringify(centered) + ')');
+              if (width === 390) await page.screenshot({ path: path.join(results, `camera-idle-${language}-390.png`) });
+              if (width <= 600) await page.locator('[data-mobile-nav="home"]').click();
+            }
             await page.locator('#helpButton').click();
             const body = page.locator('#helpDialog .dialog-body');
             assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
