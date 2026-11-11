@@ -9,6 +9,7 @@ const test = (name, fn) => nodeTest(name, { timeout: 1000 }, fn);
 const html = fs.readFileSync(process.env.DEVICE_CHECK_HTML || path.join(__dirname, '../src/index.template.html'), 'utf8');
 const translations = html.slice(html.indexOf('    const translations='), html.indexOf('    const $='));
 const state = html.slice(html.indexOf('    const testState='), html.indexOf('    const uniqueKeys='));
+const quickState = html.split('\n').find(line=>line.startsWith('    const quickTests='));
 const actualFunctions = html.slice(html.indexOf('    function friendlyMediaError('), html.indexOf('    async function playTone(')) + '\n' + ['t','setStatus','updateSummary','applyLanguage'].map(name=>html.split('\n').find(line=>line.startsWith('    function '+name+'('))).join('\n');
 const bindings = html.split('\n').filter(line=>line.includes("$('#cameraStart').addEventListener")||line.includes("$('#micStart').addEventListener")).join('\n');
 const pagehide = html.split('\n').find(line=>line.includes("addEventListener('pagehide',()=>{stopCamera()"));
@@ -49,7 +50,7 @@ function harness(config={}) {
     requestAnimationFrame(fn){const id=++nextRaf;raf.set(id,fn);return id;},cancelAnimationFrame(id){raf.delete(id)},
     addEventListener(type,fn){listeners[type]=fn},stopSensors(){},stopScreenMotion(){},
   });
-  vm.runInContext(`${translations}\n${state}\n${actualFunctions}\n${pagehide}\n${bindings}\nthis.api={startCamera,stopCamera,startMic,stopMic,getMediaStreamWithFallback,changeLanguage:(value)=>{language=value;applyLanguage()},snapshot:()=>({cameraStream,micStream,micAudioContext,micRaf,testState:{...testState}})};`,ctx);
+  vm.runInContext(`${translations}\n${state}\n${quickState}\n${actualFunctions}\n${pagehide}\n${bindings}\nthis.api={startCamera,stopCamera,startMic,stopMic,getMediaStreamWithFallback,changeLanguage:(value)=>{language=value;applyLanguage()},startQuick:()=>{quickIndex=0;quickCompleted.clear();quickWarned.clear()},snapshot:()=>({cameraStream,micStream,micAudioContext,micRaf,testState:{...testState},quickCompleted:[...quickCompleted],quickWarned:[...quickWarned]})};`,ctx);
   return {api:ctx.api,requests,enums,contexts,raf,nodes,node,listeners,toasts};
 }
 
@@ -103,4 +104,26 @@ test('mic: acquired silent stream stays checking until the user verifies meter r
   stop(h,'mic');
   assert.equal(h.node('#micResponded').disabled,true);
   assert.equal(h.node('#micNotResponded').disabled,true);
+});
+
+test('unexpected track ending revokes an active quick-check pass; normal Stop retains it',async()=>{
+  for(const kind of ['camera','mic']){
+    const h=harness();
+    h.api.startQuick();
+    const track=await acquired(h,kind,'initial');
+    assert.equal(h.api.snapshot().quickCompleted.includes(kind),true,kind+': guided step passed');
+    const previousEnded=track.track.listeners.ended;
+    track.track.end();
+    const afterEnd=h.api.snapshot();
+    assert.equal(afterEnd.testState[kind],'warn',kind+': input ended unexpectedly');
+    assert.equal(afterEnd.quickCompleted.includes(kind),false,kind+': interrupted step not counted');
+    assert.equal(afterEnd.quickWarned.includes(kind),true,kind+': interrupted step reported as warning');
+    const retry=await acquired(h,kind,'retry');
+    assert.equal(h.api.snapshot().quickCompleted.includes(kind),true,kind+': new check may pass');
+    previousEnded?.();
+    assert.equal(h.api.snapshot().quickCompleted.includes(kind),true,kind+': stale ended callback ignored');
+    stop(h,kind);
+    assert.equal(retry.track.readyState,'ended');
+    assert.equal(h.api.snapshot().quickCompleted.includes(kind),true,kind+': intentional Stop preserves result');
+  }
 });
