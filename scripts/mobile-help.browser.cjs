@@ -42,17 +42,20 @@ if(file==='dist/index.html'&&[320,360,390,1360].includes(width))await page.scree
             const body = page.locator('#helpDialog .dialog-body');
             assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
             assert.equal(await page.locator(buildSelector).count(), 1, label);
-            console.log('HELP_DIAG ' + label + ' ' + JSON.stringify(await page.evaluate(() => {
-              const dialog = document.querySelector('#helpDialog');
-              const build = document.querySelector('details.build-info');
-              const scripts = [...document.scripts].length;
-              const style = getComputedStyle(build);
-              const rect = build.getBoundingClientRect();
-              return { dialogOpen: dialog.open, dialogStyle: getComputedStyle(dialog).display,
-                buildDisplay: style.display, buildVisibility: style.visibility, buildRect: [rect.x, rect.y, rect.width, rect.height],
-                scripts, language: document.documentElement.lang };
-            })) + ' errors=' + JSON.stringify(errors));
-            assert.equal(await page.locator(buildSelector).isVisible(), true, label);
+            const buildVisible = await page.locator(buildSelector).isVisible();
+            if (!buildVisible) {
+              console.log('HELP_DIAG ' + label + ' ' + JSON.stringify(await page.evaluate(() => {
+                const dialog = document.querySelector('#helpDialog');
+                const build = document.querySelector('details.build-info');
+                const scripts = [...document.scripts].length;
+                const style = getComputedStyle(build);
+                const rect = build.getBoundingClientRect();
+                return { dialogOpen: dialog.open, dialogStyle: getComputedStyle(dialog).display,
+                  buildDisplay: style.display, buildVisibility: style.visibility, buildRect: [rect.x, rect.y, rect.width, rect.height],
+                  scripts, language: document.documentElement.lang };
+              })) + ' errors=' + JSON.stringify(errors));
+            }
+            assert.equal(buildVisible, true, label);
             for (const id of ['buildVersion', 'builtAt', 'dependencyCount']) assert.equal(await page.locator('#' + id).count(), 1, label);
 
             if (true) {
@@ -90,6 +93,21 @@ if(file==='dist/index.html'&&[320,360,390,1360].includes(width))await page.scree
             await page.locator('#helpButton').click();
             await page.mouse.click(2, 1);
             assert.equal(await page.locator('#helpDialog').isVisible(), false, label + ': backdrop');
+            if (file === 'dist/index.html' && width === 390 && height === 844) {
+              await page.locator('[data-mobile-nav="home"]').click();
+              await page.locator('#quickStart').click();
+              assert.equal(await page.locator('#quickDiagnosis').isVisible(), true, label + ': quick guide stays visible');
+              assert.equal(await page.locator('body').getAttribute('data-mobile-page'), 'media', label + ': quick navigation');
+              await page.locator('#quickNext').click();
+              await page.locator('#quickNext').click();
+              await page.locator('#quickFinish').click();
+              assert.match(await page.locator('#appToastMessage').textContent(), /0\/3/, label + ': incomplete results are not successes');
+              await page.locator('[data-mobile-nav="device"]').click();
+              await page.locator('.swatch[data-pattern="red"]').click();
+              assert.equal(await page.locator('[data-status-for="screen"]').first().getAttribute('data-state'), 'active', label + ': opening screen is not a pass');
+              await page.locator('#screenLooksOk').click();
+              assert.equal(await page.locator('[data-status-for="screen"]').first().getAttribute('data-state'), 'pass', label + ': confirmation records pass');
+            }
             assert.deepEqual(errors, [], label + ': console errors');
             assert.deepEqual(requests, [], label + ': external runtime requests');
             console.log('PASS ' + label);
