@@ -7,6 +7,14 @@ const vm = require('node:vm');
 
 const html = fs.readFileSync(process.env.DEVICE_CHECK_HTML || path.join(__dirname, '../src/index.template.html'), 'utf8');
 const lines = html.split('\n');
+
+test('the complete inline application script parses without duplicate declarations', () => {
+  const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)];
+  const app = scripts.map(item => item[1]).find(body => body.includes('const APP_CONFIG = '));
+  assert.ok(app, 'the complete inline app script exists');
+  assert.doesNotThrow(() => new vm.Script(app, { filename: 'device-check-app.js' }));
+});
+
 function appFunction(name) {
   const line = lines.find(line => line.startsWith('    function ' + name + '(') || line.startsWith('    async function ' + name + '('));
   assert.ok(line, 'real application function missing: ' + name);
