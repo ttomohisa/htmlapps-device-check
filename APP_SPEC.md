@@ -61,7 +61,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Camera and microphone requests have independent generations and operation-owned resources.
 - Stop, replacement, device selection changes, and page exit invalidate pending acquisition, default-device fallback, playback, audio setup, and device-list results.
 - Stop is enabled immediately while starting; Start is disabled during the pending attempt. An obsolete stream that arrives later is stopped without attaching it.
-- Stop releases tracks, the camera preview source, microphone graph nodes, AudioContext, and animation frames. Current input termination also releases resources and offers retry; stale termination cannot interrupt a newer session.
+- Stop releases tracks, the camera preview source, microphone graph nodes, AudioContext, and animation frames. Current input termination also releases resources and offers retry; stale termination cannot interrupt a newer session. Unexpected camera/microphone track termination removes a previously successful step from the active guided quick-check count; intentional Stop preserves it.
 - Check Web Audio availability before requesting microphone access. Rejected playback or audio startup must not count as a successful check.
 - Device-list failure is recoverable when capture is working: preserve capture and Stop, with a localized warning and retry hint.
 - Localized pending, stopped, input-ended, and failure hints survive language changes. Checked records a completed session result and is separate from current capture activity.
@@ -98,7 +98,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 ### Gamepad
 - Use the Gamepad API without external libraries. Handle security/policy exceptions without interrupting app initialization, and distinguish a connected gamepad from one with verified button/axis activity.
 - Explain that some browsers expose controllers only after a button interaction.
-- Display controller identifier, all buttons, pressed state, and axes. Preserve polling when another controller remains connected after one disconnects.
+- Display controller identifier, all buttons, pressed state, and axes. Preserve polling when another controller remains connected after one disconnects. Restore polling on a persisted `pageshow` (back/forward cache) without creating duplicate loops, and show a warning if the previously connected controller has disappeared.
 - Detect `vibrationActuator` / `hapticActuators` where exposed and provide weak and strong rumble tests.
 
 ### Motion sensors
