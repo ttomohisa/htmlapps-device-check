@@ -20,7 +20,7 @@ function fakeNodes() {
   const map = new Map();
   function get(key) {
     if (!map.has(key)) {
-      const n = { textContent: '', disabled: false, value: '35', style: {}, classList: cls(), children: [],
+      const n = { textContent: '', disabled: false, value: '35', style: {}, classList: cls(), children: [], listeners:{},addEventListener(type,fn){this.listeners[type]=fn},
         append(c) { this.children.push(c); }, querySelector() { return {textContent:''}; } };
       Object.defineProperty(n, 'innerHTML', { set() { n.children.length = 0; } });
       map.set(key, n);
