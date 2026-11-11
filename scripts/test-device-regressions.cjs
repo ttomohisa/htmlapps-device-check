@@ -144,6 +144,7 @@ test('quick diagnosis with zero verified steps is incomplete, not success', () =
     $: node, $$: () => steps, quickIndex: 2,
     quickTests: ['camera', 'mic', 'speaker'],
     testState: { camera: 'idle', mic: 'warn', speaker: 'idle' },
+    quickCompleted: new Set(), quickWarned: new Set(),
     t: key => key, showToast: (...args) => notifications.push(args)
   });
   vm.runInContext(appFunction('updateQuickDiagnosis') + '\n' + appFunction('finishQuickDiagnosis') +
@@ -231,4 +232,47 @@ test('camera waiting message overlays the video and centers its content', () => 
   }
   assert.match(html, /\.camera-live \.preview-placeholder\{display:none\}/);
   assert.match(html, /<div class="preview" id="cameraPreview"><video\b[^>]*><\/video><div class="preview-placeholder">/);
+});
+
+
+test('quick check starts fresh even if previous checks all passed', () => {
+  const nodes = new Map();
+  const node = id => {
+    if (!nodes.has(id)) nodes.set(id, { textContent: '', dataset: {}, disabled: false, classList: classList() });
+    return nodes.get(id);
+  };
+  const notifications = [];
+  const ctx = vm.createContext({
+    $: node, $$: () => [], document: { getElementById: () => null },
+    quickIndex: -1, quickTests: ['camera', 'mic', 'speaker'],
+    quickCompleted: new Set(['camera', 'mic', 'speaker']), quickWarned: new Set(),
+    quickSpeakerPlayed: true, testState: { camera: 'pass', mic: 'pass', speaker: 'pass' },
+    isMobileNav: () => false, updateQuickDiagnosis() {},
+    t: value => value, showToast: (...args) => notifications.push(args)
+  });
+  vm.runInContext(appFunction('goQuickStep') + '\n' +
+    appFunction('startQuickDiagnosis') + '\n' +
+    appFunction('finishQuickDiagnosis') +
+    '\nstartQuickDiagnosis();finishQuickDiagnosis();', ctx);
+  assert.equal(ctx.quickCompleted.size, 0, 'previous positive results cannot count toward a new run');
+  assert.deepEqual(notifications, [['quickIncomplete (0/3)', 'warning']]);
+  assert.equal(node('#speakerHeard').disabled, true);
+  assert.equal(node('#speakerNotHeard').disabled, true);
+});
+
+test('new sensor check clears stale measurements before permission resolves', async () => {
+  const h = sensorHarness();
+  const first = h.api.startSensors();
+  h.requests.forEach(request => request.resolve('granted'));
+  await first;
+  h.listeners.get('devicemotion')({accelerationIncludingGravity:{x:8,y:9,z:10}});
+  assert.equal(h.node('#sensorAccX').textContent, '8');
+  h.api.stopSensors();
+  const second = h.api.startSensors();
+  assert.equal(h.node('#sensorAccX').textContent, '—');
+  assert.equal(h.node('#sensorAccY').textContent, '—');
+  assert.equal(h.node('#sensorAccZ').textContent, '—');
+  h.api.stopSensors();
+  h.requests.slice(2).forEach(request=>request.resolve('granted'));
+  await second;
 });
