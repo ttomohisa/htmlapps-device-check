@@ -97,6 +97,12 @@ Tab / Shift+Tabでテスト領域から移動できます。**キーボード結
 
 公開される成果物は `dist/index.html` です。
 
+### マージ後のタグとGitHub Release
+
+`main` にマージすると、`.github/workflows/release.yml` が `app.config.json` のバージョン（例：`1.0.6`）を確認します。`v1.0.6` のタグがまだなければ、単一HTMLのビルドと検証が成功した後に、そのマージ済みコミットへタグを作成し、GitHub Releaseへ `device-check.html` と `device-check.self-extract.html` を添付します。
+
+同じバージョンのReleaseが既にあれば何もしません。タグだけが存在する場合は、既存タグを変更せずエラーとして停止します。次回リリースでは `app.config.json` のバージョンを上げてください。GitHub Actionsと `contents: write` 権限が必要です。PRのマージや、別リポジトリのBrowser Kitty本体への反映は自動では行いません。
+
 ## 開発・ビルド構成
 
 ```text
@@ -116,7 +122,8 @@ Tab / Shift+Tabでテスト領域から移動できます。**キーボード結
 │  └─ index.self-extract.html     # gzip自己展開版
 └─ .github/workflows/
    ├─ build-standalone.yml        # ビルド検証
-   └─ deploy-pages.yml            # GitHub Pages公開
+   ├─ deploy-pages.yml            # GitHub Pages公開
+   └─ release.yml                 # mainの検証後にタグとReleaseを作成
 ```
 
 ### Windowsでローカルビルド
