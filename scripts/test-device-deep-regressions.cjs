@@ -14,7 +14,7 @@ function source(name) {
 }
 function cls() {
   const values = new Set();
-  return { add: x => values.add(x), remove: x => values.delete(x), contains: x => values.has(x) };
+  return { add: x => values.add(x), remove: x => values.delete(x), contains: x => values.has(x), toggle(x,on){if(on)values.add(x);else values.delete(x)} };
 }
 function fakeNodes() {
   const map = new Map();
