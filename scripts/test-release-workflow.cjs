@@ -37,3 +37,16 @@ test('standalone is verified before publishing and includes both downloadable HT
   assert.match(workflow, /--generate-notes/);
   assert.ok((workflow.match(/if: \$\{\{ steps\.version\.outputs\.needed == 'true' \}\}/g) || []).length >= 4);
 });
+
+test('expected missing tags do not leave a failing native exit status', () => {
+  const step = workflow.match(/      - name: Check version and existing tag\n([\s\S]*?)(?=      - name: Set up Node\.js)/);
+  assert.ok(step, 'the version-check step must exist');
+  const commands = step[1];
+  assert.match(commands, /gh release view \$tag/);
+  assert.match(commands, /gh api "repos\/\$env:GITHUB_REPOSITORY\/git\/ref\/tags\/\$tag"/);
+  assert.match(commands, /"needed=true" \| Out-File/);
+  assert.match(commands, /Write-Host "\$tag already has a GitHub Release/);
+  assert.match(commands, /throw "\$tag exists without a GitHub Release/);
+  assert.match(commands, /Write-Host "Will publish \$tag after validating the merged main commit\."[\s\S]*?\n\s+exit 0\s*$/,
+    'a missing tag is an expected 404, not an Actions step failure: clear the final native exit code');
+});
