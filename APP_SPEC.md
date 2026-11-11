@@ -122,7 +122,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Help dialog explains permissions, secure-context limitations, speaker-test limitation, and privacy.
 - While the native Help modal is open, lock background scrolling on both the document root and body. Keep the existing bounded dialog shell and independently scrolling Help content; Close, Escape, and backdrop dismissal retain their native behavior.
 - Test status states: untested, checking, checked, needs attention, unsupported. The summary pass count includes only confirmed checks, not warnings or blocked tests.
-- No test result persistence; only language preference may use localStorage.
+- No test result persistence; only language and quick-check visibility preferences may use localStorage.
 
 ## 5. Data and privacy
 
@@ -197,7 +197,7 @@ Direct `file://` opening is required for the application shell and non-permissio
 - **Input files:** none.
 - **File exports:** none.
 - **Third-party dependencies:** none.
-- **Persistence:** language preference only.
+- **Persistence:** language and quick-check visibility preferences only; diagnostic results remain session-only.
 - **Undo/redo:** not needed; tests are transient.
 - **Heavy async phases:** not applicable; permission-gated tests use untested → checking → checked / needs-attention / unsupported.
 - **Bilingual UI:** required.
