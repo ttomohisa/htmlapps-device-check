@@ -48,13 +48,18 @@ function gamepadHarness({ blocked = false } = {}) {
     t: x => x, setStatus: (key, value) => states.push([key,value]), showToast: (...args) => toasts.push(args),
     addEventListener: (key, fn) => eventHandlers[key] = fn,
     requestAnimationFrame: fn => {const id=++nextRaf;raf.set(id,fn);return id},
-    cancelAnimationFrame: id=>raf.delete(id)
+    cancelAnimationFrame: id=>raf.delete(id),
+    stopCamera(){},stopMic(){},stopSensors(){},stopScreenMotion(){},stopSpeakerTone(){},
+    speakerContext:null,speakerPlaybackGeneration:0
   };
   const ctx = vm.createContext(sandbox);
   const gamepadFns = ['getGamepadList','currentGamepad','getHapticActuator','updateGamepadHapticState','pollGamepads'].map(source).join('\n');
   const eventBinding = lines.find(line => line.includes("addEventListener('gamepadconnected'"));
   assert.ok(eventBinding);
-  vm.runInContext(gamepadFns+'\n'+eventBinding+'\nthis.api={currentGamepad,pollGamepads};',ctx);
+  const pagehide = lines.find(line => line.startsWith("    addEventListener('pagehide',()=>{stopCamera()"));
+  const pageshow = lines.find(line => line.startsWith("    addEventListener('pageshow',event=>"));
+  assert.ok(pagehide && pageshow, 'actual BFCache lifecycle callbacks must be registered');
+  vm.runInContext(gamepadFns+'\n'+eventBinding+'\n'+pagehide+'\n'+pageshow+'\nthis.api={currentGamepad,pollGamepads};',ctx);
   return {ctx,get,map,states,toasts,eventHandlers,raf,setPads: next =>{pads=next}};
 }
 
@@ -181,4 +186,37 @@ test('display overlay uses translated names instead of raw internal pattern code
     ctx.openScreen(pattern);
     assert.ok(![pattern].includes($('#screenOverlayLabel').textContent));
   }
+});
+
+test('BFCache restore resumes gamepad polling without duplicating animation loops', () => {
+  const h=gamepadHarness();
+  const pad={index:0,id:'Pad A',buttons:[{pressed:false,value:0}],axes:[0]};
+  h.setPads([pad]);
+  h.ctx.api.pollGamepads();
+  assert.equal(h.raf.size,1,'one loop while page is active');
+  h.eventHandlers.pagehide({persisted:true});
+  assert.equal(h.raf.size,0,'pagehide stops polling');
+  h.eventHandlers.pageshow({persisted:false});
+  assert.equal(h.raf.size,0,'normal pageshow does not start extra polling');
+  h.eventHandlers.pageshow({persisted:true});
+  assert.equal(h.raf.size,1,'BFCache restore restarts one loop');
+  h.eventHandlers.pageshow({persisted:true});
+  assert.equal(h.raf.size,1,'repeat restore does not spawn a second loop');
+  pad.buttons[0].pressed=true;
+  h.ctx.api.pollGamepads();
+  assert.deepEqual(h.states.slice(-1),[['gamepad','pass']]);
+
+  h.eventHandlers.pagehide({persisted:true});
+  h.setPads([]);
+  h.eventHandlers.pageshow({persisted:true});
+  assert.equal(h.raf.size,0,'disconnected pad does not leave a polling loop');
+  assert.deepEqual(h.states.slice(-1),[['gamepad','warn']],'stale connection becomes a warning');
+  assert.equal(h.get('#gamepadLive').classList.contains('show'),false,'stale controller view is hidden');
+});
+
+test('BFCache restore of a blocked Gamepad API keeps the rest of the app running',()=>{
+  const h=gamepadHarness({blocked:true});
+  assert.doesNotThrow(()=>h.eventHandlers.pageshow({persisted:true}));
+  assert.deepEqual(h.states.slice(-1),[['gamepad','unsupported']]);
+  assert.equal(h.raf.size,0);
 });
