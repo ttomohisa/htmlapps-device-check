@@ -15,8 +15,8 @@ In one session, a user can:
 
 - confirm that a camera produces video and inspect the reported resolution / FPS;
 - run a guided pre-call sequence for camera, microphone, and speakers;
-- confirm microphone activity and inspect waveform, peak, noise floor, stereo balance, and audio settings;
-- play left / center / right speaker test tones and record a manual result;
+- confirm microphone activity and inspect waveform, peak, noise floor, stereo balance, and audio settings; do not mark this test passed until the user confirms that the meter reacted;
+- play left / center / right speaker test tones and record a manual result; replace overlapping tones and refuse mislabeled channel playback when the browser has no stereo routing;
 - inspect a display with solid colors, gray steps, checker/fine-line/RGB patterns, image-retention check, and 60/120Hz motion comparison;
 - inspect keyboard `key`, `code`, modifiers, simultaneous presses, and Ghosting / N-key rollover behavior;
 - inspect mouse / pen / touch coordinates, pressure, and observed simultaneous touch count;
@@ -96,7 +96,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Use `touch-action: none` only inside the dedicated test surface.
 
 ### Gamepad
-- Use the Gamepad API without external libraries.
+- Use the Gamepad API without external libraries. Handle security/policy exceptions without interrupting app initialization, and distinguish a connected gamepad from one with verified button/axis activity.
 - Explain that some browsers expose controllers only after a button interaction.
 - Display controller identifier, all buttons, pressed state, and axes. Preserve polling when another controller remains connected after one disconnects.
 - Detect `vibrationActuator` / `hapticActuators` where exposed and provide weak and strong rumble tests.
@@ -111,7 +111,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Show support for getUserMedia, Web Audio, Pointer Events, Gamepad, Device Motion, WebGL, WebGPU, MediaRecorder, WebCodecs, Clipboard, Fullscreen, and Vibration.
 
 ### Quick diagnosis
-- Offer an optional guided pre-call flow for camera → microphone → speakers. Keep its progress controls available in the mobile Camera & Audio view while the guide is active, and report incomplete checks without success messaging.
+- Offer an optional guided pre-call flow for camera → microphone → speakers. Keep its progress controls available in the mobile Camera & Audio view while the guide is active, and report incomplete checks without success messaging. Repeated runs count only results confirmed after the new run begins.
 - Never request camera or microphone permission automatically when the flow starts; the user must explicitly press each device Start button.
 - Keep the guide visible while active and allow direct step navigation.
 
@@ -152,7 +152,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Status changes have both text and color; color is never the only signal.
 - Permission errors are described without claiming hardware failure.
 - Fullscreen display overlay provides an explicit close control and exits with Escape.
-- Motion respects `prefers-reduced-motion`.
+- Motion respects `prefers-reduced-motion`. Sensor values are reset when starting another session so prior readings are not mistaken for new samples.
 - Camera preview uses `playsinline` for smartphones, and the idle placeholder is centered over the video box without occupying a separate grid row.
 
 ## 8. Performance expectations
