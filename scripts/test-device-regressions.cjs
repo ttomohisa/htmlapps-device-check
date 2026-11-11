@@ -220,3 +220,15 @@ test('mouse hover, iPad detection, fullscreen exit, and manual screen results re
   assert.match(html, /id="screenIssue"/);
   assert.match(html, /document\.addEventListener\('fullscreenchange'/);
 });
+
+
+test('camera waiting message overlays the video and centers its content', () => {
+  const rule = html.match(/\.preview-placeholder\{([^}]*)\}/);
+  assert.ok(rule, 'camera waiting message CSS exists');
+  for (const declaration of ['position:absolute', 'inset:0', 'display:flex',
+    'flex-direction:column', 'align-items:center', 'justify-content:center']) {
+    assert.ok(rule[1].includes(declaration), 'missing preview centering declaration ' + declaration);
+  }
+  assert.match(html, /\.camera-live \.preview-placeholder\{display:none\}/);
+  assert.match(html, /<div class="preview" id="cameraPreview"><video\b[^>]*><\/video><div class="preview-placeholder">/);
+});
