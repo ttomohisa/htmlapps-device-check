@@ -260,7 +260,7 @@
     Object.assign(translations.en,{helpDialogUse:'Use Close, Esc, or click outside the dialog to return.'});
     Object.assign(translations.ja,{quickIncomplete:'未確認の項目があります',sensorStopped:'センサーを停止しました。前回確認した値は画面に残っています。',sensorNotChecked:'センサーを停止しました。値は取得されていません。',screenLooksOk:'問題なし',screenIssue:'気になる点あり'});
     Object.assign(translations.en,{quickIncomplete:'Some steps were not verified',sensorStopped:'Sensor monitoring stopped. Previously received values remain visible.',sensorNotChecked:'Sensor monitoring stopped. No sensor values were received.',screenLooksOk:'Looks OK',screenIssue:'Issue noticed'});
-    const $=s=>document.querySelector(s), $=s=>[...document.querySelectorAll(s)];
+    const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
     // Kept as an explicit marker for the shared template export contract; this app has no file export.
     const outputFilename = null;
     const storageKey=`${APP_CONFIG.slug}:language`;
