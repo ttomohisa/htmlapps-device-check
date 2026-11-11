@@ -15,8 +15,8 @@ In one session, a user can:
 
 - confirm that a camera produces video and inspect the reported resolution / FPS;
 - run a guided pre-call sequence for camera, microphone, and speakers;
-- confirm microphone activity and inspect waveform, peak, noise floor, stereo balance, and audio settings;
-- play left / center / right speaker test tones and record a manual result;
+- confirm microphone activity and inspect waveform, peak, noise floor, stereo balance, and audio settings; do not mark this test passed until the user confirms that the meter reacted;
+- play left / center / right speaker test tones and record a manual result; replace overlapping tones and refuse mislabeled channel playback when the browser has no stereo routing;
 - inspect a display with solid colors, gray steps, checker/fine-line/RGB patterns, image-retention check, and 60/120Hz motion comparison;
 - inspect keyboard `key`, `code`, modifiers, simultaneous presses, and Ghosting / N-key rollover behavior;
 - inspect mouse / pen / touch coordinates, pressure, and observed simultaneous touch count;
@@ -61,7 +61,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Camera and microphone requests have independent generations and operation-owned resources.
 - Stop, replacement, device selection changes, and page exit invalidate pending acquisition, default-device fallback, playback, audio setup, and device-list results.
 - Stop is enabled immediately while starting; Start is disabled during the pending attempt. An obsolete stream that arrives later is stopped without attaching it.
-- Stop releases tracks, the camera preview source, microphone graph nodes, AudioContext, and animation frames. Current input termination also releases resources and offers retry; stale termination cannot interrupt a newer session.
+- Stop releases tracks, the camera preview source, microphone graph nodes, AudioContext, and animation frames. Current input termination also releases resources and offers retry; stale termination cannot interrupt a newer session. Unexpected camera/microphone track termination removes a previously successful step from the active guided quick-check count; intentional Stop preserves it.
 - Check Web Audio availability before requesting microphone access. Rejected playback or audio startup must not count as a successful check.
 - Device-list failure is recoverable when capture is working: preserve capture and Stop, with a localized warning and retry hint.
 - Localized pending, stopped, input-ended, and failure hints survive language changes. Checked records a completed session result and is separate from current capture activity.
@@ -76,8 +76,8 @@ A local single-HTML implementation is useful because no captured media needs to 
 ### Display
 - Provide black, white, red, green, blue, continuous gradient, 16-step gray, checkerboard, 1px fine-line, and RGB gradient patterns.
 - Provide an image-retention flow that switches from a high-contrast pattern to neutral gray.
-- Provide a motion comparison with a 60fps reference and a display-refresh animation, including a requestAnimationFrame-based refresh estimate.
-- Open the selected pattern in a full-viewport overlay and request Fullscreen when available.
+- Provide a motion comparison with a 60fps reference driven by elapsed-time frame indices, not a minimum per-callback interval, and a display-refresh animation including a requestAnimationFrame-based refresh estimate.
+- Open the selected pattern in a full-viewport overlay and request Fullscreen when available. Mark the test as checking until the user chooses Looks OK / Issue noticed; closing without a choice preserves the prior result. Browser-initiated fullscreen exits must also close the overlay.
 - Exit with the on-screen close control or Escape.
 
 ### Keyboard
@@ -91,27 +91,27 @@ A local single-HTML implementation is useful because no captured media needs to 
 
 ### Pointer / touch
 - Use Pointer Events.
-- Display pointer type, x/y position, pressure, `navigator.maxTouchPoints`, current active touches, and the maximum simultaneous touch count observed during the session.
+- Display pointer type, x/y position, pressure, `navigator.maxTouchPoints`, current active touches, and the maximum simultaneous touch count observed during the session. Update mouse and pen hover coordinates without requiring a button press.
 - Support simultaneous touch pointers visually with separate markers.
 - Use `touch-action: none` only inside the dedicated test surface.
 
 ### Gamepad
-- Use the Gamepad API without external libraries.
+- Use the Gamepad API without external libraries. Handle security/policy exceptions without interrupting app initialization, and distinguish a connected gamepad from one with verified button/axis activity.
 - Explain that some browsers expose controllers only after a button interaction.
-- Display controller identifier, all buttons, pressed state, and axes.
+- Display controller identifier, all buttons, pressed state, and axes. Preserve polling when another controller remains connected after one disconnects. Restore polling on a persisted `pageshow` (back/forward cache) without creating duplicate loops, and show a warning if the previously connected controller has disappeared.
 - Detect `vibrationActuator` / `hapticActuators` where exposed and provide weak and strong rumble tests.
 
 ### Motion sensors
 - Support Device Orientation and Device Motion where available.
 - Request iOS-style permission only from a Start button when `requestPermission()` exists.
-- Show alpha/beta/gamma and acceleration including gravity when exposed.
+- Show alpha/beta/gamma and acceleration including gravity when exposed. Request all permission-gated sensor APIs within the original click activation; Stop and page exit invalidate pending permissions, callbacks, timers, and listeners.
 - Allow stopping listeners.
 
 ### Capability summary
 - Show support for getUserMedia, Web Audio, Pointer Events, Gamepad, Device Motion, WebGL, WebGPU, MediaRecorder, WebCodecs, Clipboard, Fullscreen, and Vibration.
 
 ### Quick diagnosis
-- Offer an optional guided pre-call flow for camera → microphone → speakers.
+- Offer an optional guided pre-call flow for camera → microphone → speakers. Keep its progress controls available in the mobile Camera & Audio view while the guide is active, and report incomplete checks without success messaging. Repeated runs count only results confirmed after the new run begins.
 - Never request camera or microphone permission automatically when the flow starts; the user must explicitly press each device Start button.
 - Keep the guide visible while active and allow direct step navigation.
 
@@ -121,8 +121,8 @@ A local single-HTML implementation is useful because no captured media needs to 
 - No runtime network requests.
 - Help dialog explains permissions, secure-context limitations, speaker-test limitation, and privacy.
 - While the native Help modal is open, lock background scrolling on both the document root and body. Keep the existing bounded dialog shell and independently scrolling Help content; Close, Escape, and backdrop dismissal retain their native behavior.
-- Test status states: untested, checking, checked, needs attention, unsupported.
-- No test result persistence; only language preference may use localStorage.
+- Test status states: untested, checking, checked, needs attention, unsupported. The summary pass count includes only confirmed checks, not warnings or blocked tests.
+- No test result persistence; only language and quick-check visibility preferences may use localStorage.
 
 ## 5. Data and privacy
 
@@ -152,8 +152,8 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Status changes have both text and color; color is never the only signal.
 - Permission errors are described without claiming hardware failure.
 - Fullscreen display overlay provides an explicit close control and exits with Escape.
-- Motion respects `prefers-reduced-motion`.
-- Camera preview uses `playsinline` for smartphones.
+- Motion respects `prefers-reduced-motion`. Sensor values are reset when starting another session so prior readings are not mistaken for new samples.
+- Camera preview uses `playsinline` for smartphones, and the idle placeholder is centered over the video box without occupying a separate grid row.
 
 ## 8. Performance expectations
 
@@ -197,7 +197,7 @@ Direct `file://` opening is required for the application shell and non-permissio
 - **Input files:** none.
 - **File exports:** none.
 - **Third-party dependencies:** none.
-- **Persistence:** language preference only.
+- **Persistence:** language and quick-check visibility preferences only; diagnostic results remain session-only.
 - **Undo/redo:** not needed; tests are transient.
 - **Heavy async phases:** not applicable; permission-gated tests use untested → checking → checked / needs-attention / unsupported.
 - **Bilingual UI:** required.
@@ -214,3 +214,10 @@ Keep existing build metadata at the very end of How to use & Notes, not the main
 ## Header visibility
 
 Keep the header version visible on narrow smartphones without overlapping the app name or language/Help controls. Verify Japanese and English at 320px, 360px, 390px and desktop widths.
+
+## Release automation
+
+- After a merge pushes the new version to `main`, the Release workflow reads the stable Semantic Versioning value from `app.config.json`.
+- A previously released version is skipped; an existing tag without its Release is not moved or reused automatically.
+- A new version runs repository validation, builds both standalone HTML variants, then creates `v<version>` on the validated commit and publishes the two HTMLs as GitHub Release assets.
+- Publishing requires GitHub Actions `contents: write`; the separate Browser Kitty site repository is not updated by this workflow.

@@ -142,8 +142,8 @@ $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
 
-& node --test (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs") (Join-Path $Root "scripts/test-header-language.cjs") (Join-Path $Root "scripts/test-help-modal-scroll.cjs")
-if ($LASTEXITCODE -ne 0) { throw "Media lifecycle, keyboard result, release artifact, header language, or Help modal regressions failed." }
+& node --test (Join-Path $Root "scripts/test-release-workflow.cjs") (Join-Path $Root "scripts/test-media-lifecycle.cjs") (Join-Path $Root "scripts/test-device-regressions.cjs") (Join-Path $Root "scripts/test-device-deep-regressions.cjs") (Join-Path $Root "scripts/test-keyboard-results.cjs") (Join-Path $Root "scripts/test-release-artifacts.cjs") (Join-Path $Root "scripts/test-header-language.cjs") (Join-Path $Root "scripts/test-help-modal-scroll.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Media lifecycle, device diagnostics, keyboard result, release artifact, header language, or Help modal regressions failed." }
 
 $previousHtml = $env:DEVICE_CHECK_HTML
 try {

@@ -37,12 +37,43 @@ async function main() {
 
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), label + ': page width');
 
-if(file==='dist/index.html'&&[320,360,390,1360].includes(width))await page.screenshot({path:path.join(results,`main-${language}-${width}.png`)});
+if (file === 'dist/index.html' && [320, 360, 390, 1360].includes(width)) {
+              if (width <= 600) await page.locator('[data-mobile-nav="media"]').click();
+              const centered = await page.locator('#cameraPreview').evaluate(preview => {
+                const bounds = preview.getBoundingClientRect();
+                const children = [...preview.querySelector('.preview-placeholder').children].map(child => child.getBoundingClientRect());
+                const top = Math.min(...children.map(rect => rect.top));
+                const bottom = Math.max(...children.map(rect => rect.bottom));
+                const mid = (top + bottom) / 2;
+                const center = (bounds.top + bounds.bottom) / 2;
+                const style = getComputedStyle(preview.querySelector('.preview-placeholder'));
+                return { difference: Math.abs(mid - center), position: style.position,
+                  withinBounds: top >= bounds.top - 1 && bottom <= bounds.bottom + 1 };
+              });
+              assert.equal(centered.position, 'absolute', label + ': idle message overlays video instead of adding a grid row');
+              assert.ok(centered.withinBounds && centered.difference < 8,
+                label + ': idle icon and message centered in the camera preview (' + JSON.stringify(centered) + ')');
+              if (width === 390) await page.screenshot({ path: path.join(results, `camera-idle-${language}-390.png`) });
+              if (width <= 600) await page.locator('[data-mobile-nav="home"]').click();
+            }
             await page.locator('#helpButton').click();
             const body = page.locator('#helpDialog .dialog-body');
             assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
             assert.equal(await page.locator(buildSelector).count(), 1, label);
-            assert.equal(await page.locator(buildSelector).isVisible(), true, label);
+            const buildVisible = await page.locator(buildSelector).isVisible();
+            if (!buildVisible) {
+              console.log('HELP_DIAG ' + label + ' ' + JSON.stringify(await page.evaluate(() => {
+                const dialog = document.querySelector('#helpDialog');
+                const build = document.querySelector('details.build-info');
+                const scripts = [...document.scripts].length;
+                const style = getComputedStyle(build);
+                const rect = build.getBoundingClientRect();
+                return { dialogOpen: dialog.open, dialogStyle: getComputedStyle(dialog).display,
+                  buildDisplay: style.display, buildVisibility: style.visibility, buildRect: [rect.x, rect.y, rect.width, rect.height],
+                  scripts, language: document.documentElement.lang };
+              })) + ' errors=' + JSON.stringify(errors));
+            }
+            assert.equal(buildVisible, true, label);
             for (const id of ['buildVersion', 'builtAt', 'dependencyCount']) assert.equal(await page.locator('#' + id).count(), 1, label);
 
             if (true) {
@@ -80,6 +111,34 @@ if(file==='dist/index.html'&&[320,360,390,1360].includes(width))await page.scree
             await page.locator('#helpButton').click();
             await page.mouse.click(2, 1);
             assert.equal(await page.locator('#helpDialog').isVisible(), false, label + ': backdrop');
+            if (file === 'dist/index.html' && width === 390 && height === 844) {
+              await page.locator('[data-mobile-nav="media"]').click();
+              assert.equal(await page.locator('#micResponded').isDisabled(), true, label + ': microphone response cannot be confirmed before capture');
+              assert.equal(await page.locator('#micNotResponded').isDisabled(), true, label + ': microphone failure cannot be recorded before capture');
+              assert.equal(await page.locator('[data-i18n="micVerifyQuestion"]').isVisible(), true, label + ': microphone confirmation is visible');
+              await page.locator('[data-mobile-nav="home"]').click();
+              await page.locator('#quickStart').click();
+              assert.equal(await page.locator('#quickDiagnosis').isVisible(), true, label + ': quick guide stays visible');
+              assert.equal(await page.locator('body').getAttribute('data-mobile-page'), 'media', label + ': quick navigation');
+              await page.locator('#quickNext').click();
+              await page.locator('#quickNext').click();
+              await page.locator('#quickFinish').click();
+              assert.match(await page.locator('#appToastMessage').textContent(), /0\/3/, label + ': incomplete results are not successes');
+              await page.locator('[data-mobile-nav="device"]').click();
+              await page.locator('.swatch[data-pattern="red"]').click();
+              assert.equal(await page.locator('[data-status-for="screen"]').first().getAttribute('data-state'), 'active', label + ': opening screen is not a pass');
+              await page.locator('#screenLooksOk').click();
+              assert.equal(await page.locator('[data-status-for="screen"]').first().getAttribute('data-state'), 'pass', label + ': confirmation records pass');
+              const expectedPatterns = language === 'ja' ?
+                { graysteps:'16段階', lines:'細線', rgb:'RGB階調', motion:'60/120Hz' } :
+                { graysteps:'16 steps', lines:'Fine lines', rgb:'RGB gradient', motion:'60/120Hz' };
+              for (const [pattern, expectedLabel] of Object.entries(expectedPatterns)) {
+                await page.locator('.swatch[data-pattern="' + pattern + '"]').click();
+                assert.equal((await page.locator('#screenOverlayLabel').textContent()).trim(), expectedLabel,
+                  label + ': localized display overlay ' + pattern);
+                await page.locator('#screenClose').click();
+              }
+            }
             assert.deepEqual(errors, [], label + ': console errors');
             assert.deepEqual(requests, [], label + ': external runtime requests');
             console.log('PASS ' + label);

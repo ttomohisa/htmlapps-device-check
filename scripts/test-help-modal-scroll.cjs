@@ -36,17 +36,41 @@ test('Help retains its existing bounded shell and independently scrolling conten
   assert.match(html, /<button[^>]*id="closeHelpButton"[^>]*type="button"/);
 });
 
-test('Japanese and English Help explain existing ways to close without layout audit prose', () => {
+test('Help stays short and preserves critical device testing limitations in both languages', () => {
   const help = html.match(/<!-- APP:HELP:BEGIN -->([\s\S]*?)<!-- APP:HELP:END -->/);
   assert.ok(help, 'Help content must stay in its source region');
-  assert.match(help[1], /data-i18n="helpDialogUse"/);
+  assert.doesNotMatch(help[1], /data-i18n="helpDialogUse"/, 'Closing instructions do not need to take space in the UI');
+  assert.doesNotMatch(help[1], /data-i18n="helpKeyboardReset"|data-i18n="helpOffline"/,
+    'Per-test details and internal implementation notes should not clutter Help');
+  const keys = [...help[1].matchAll(/<li data-i18n="([^"]+)"/g)].map(m => m[1]);
+  assert.deepEqual(keys, ['helpStep1', 'helpStep2', 'helpStep3',
+    'helpNotePermission', 'helpMediaLifecycle', 'helpNoteLimitation'],
+    'Keep just three steps and three key limitations');
+  for (const key of ['helpStep1', 'helpStep2', 'helpStep3', 'helpPrivacyBody',
+    'helpNotePermission', 'helpMediaLifecycle', 'helpNoteLimitation']) {
+    assert.match(help[1], new RegExp('data-i18n="' + key + '"'), key + ' must remain in Help');
+  }
   const context = vm.createContext({});
   const start = html.indexOf('    const translations=');
   const end = html.indexOf('    const $=');
   assert.ok(start >= 0 && end > start, 'Real translations must be present');
   vm.runInContext(html.slice(start, end) + '\nthis.copy=translations;', context);
-  assert.doesNotMatch(context.copy.ja.helpDialogUse, /背景.*スクロール/);
-  assert.match(context.copy.ja.helpDialogUse, /閉じる.*Esc.*外側/);
-  assert.doesNotMatch(context.copy.en.helpDialogUse, /background.*scroll/i);
-  assert.match(context.copy.en.helpDialogUse, /Close.*Esc.*outside/i);
+  const ja = context.copy.ja, en = context.copy.en;
+  for (const key of ['helpStep1', 'helpStep2', 'helpStep3', 'helpPrivacyBody',
+    'helpNotePermission', 'helpMediaLifecycle', 'helpNoteLimitation']) {
+    assert.ok(ja[key] && en[key], key + ': translation must be bilingual');
+  }
+  assert.doesNotMatch(ja.helpStep1, /閉じる|Esc/);
+  assert.doesNotMatch(en.helpStep1, /Close|Esc/);
+  assert.match(ja.helpNotePermission, /HTTPS/);
+  assert.match(en.helpNotePermission, /HTTPS/);
+  assert.match(ja.helpPrivacyBody, /送信しません/);
+  assert.match(en.helpPrivacyBody, /not sent/);
+  assert.match(ja.helpPrivacyBody, /言語.*クイック診断/);
+  assert.match(en.helpPrivacyBody, /language and quick-check/);
+  assert.match(ja.helpNoteLimitation, /故障は断定できません。/);
+  assert.match(en.helpNoteLimitation, /cannot confirm whether hardware is faulty/);
+  assert.equal(ja.introTitle, '端末の動作を確認する');
+  assert.equal(en.introTitle, 'Check your device');
+  assert.ok(ja.lead.length < 65 && en.lead.length < 110, 'Hero descriptions remain short');
 });

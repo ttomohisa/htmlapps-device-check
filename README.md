@@ -18,10 +18,10 @@ No installation or account is required. Open the app, choose a test, and interac
 
 ## Features
 
-- **Run a quick pre-call check** — Step through camera, microphone, and speaker checks before a meeting. Hide the guide when you do not need it; that display preference is remembered locally.
-- **Inspect camera and microphone behavior** — Preview the selected camera and see reported resolution, FPS, facing mode, microphone level, waveform, peak, rolling noise floor, channel levels, and audio settings.
-- **Test speakers by channel** — Play locally generated center, left, and right tones and record whether each output was audible.
-- **Check display behavior full-screen** — Use solid colors, gradients, gray steps, checkerboards, 1 px lines, RGB ramps, image-retention patterns, and motion tests for visual inspection.
+- **Run a quick pre-call check** — Step through camera, microphone, and speaker checks before a meeting. Restarting the guide requires new results and does not reuse earlier passes. On phones, the guide remains visible on the Camera & Audio tab while a check is active. Only verified steps count toward the result; missing or failed checks are reported as incomplete. Hide the guide when you do not need it; that display preference is remembered locally.
+- **Inspect camera and microphone behavior** — Preview the selected camera and see reported resolution, FPS, facing mode, microphone level, waveform, peak, rolling noise floor, channel levels, and audio settings. A microphone is not marked checked just because access succeeds: speak and choose whether the meter responded.
+- **Test speakers by channel** — Play locally generated center, left, and right tones and record whether each output was audible. Repeated taps replace the previous tone; left/right playback is disabled with an explanation if no stereo-routing API is available.
+- **Check display behavior full-screen** — Use solid colors, gradients, gray steps, checkerboards, 1 px lines, RGB ramps, image-retention patterns, and motion tests for visual inspection. Confirm Looks OK or Issue noticed after viewing a pattern; closing without an answer keeps the previous result.
 - **Check keyboard and touch input in real time** — See `key`, `code`, modifiers, simultaneous key presses, a visual key map, pointer coordinates, pressure, pointer type, and observed multi-touch count.
 - **Inspect gamepads and motion sensors** — View buttons and axes live, try weak/strong haptics on supported controllers, and inspect orientation or motion values where available.
 - **See browser capability support** — Review availability for related APIs such as WebGL, WebGPU, WebCodecs, MediaRecorder, Gamepad, and sensor APIs.
@@ -53,9 +53,9 @@ Open Help in the upper-right corner for instructions and limitations. While it i
 
 1. Start **Pre-call Quick Check**.
 2. Check the camera preview and mark the camera step complete.
-3. Start the microphone test, speak normally, and confirm that the level and waveform react.
+3. Start the microphone test, speak normally, and select **It responded** or **No response** based on the meter and waveform.
 4. Play the speaker test tones and confirm the outputs you can hear.
-5. Finish the guide or switch back to any individual test at any time.
+5. Finish the guide or switch back to any individual test at any time. An unverified step makes the final outcome incomplete rather than successful. Restarting the guide starts with 0/3, even if tests passed earlier.
 
 ### Individual tests
 
@@ -72,11 +72,11 @@ The main screen provides dedicated tests for:
 | Gamepad | Buttons, axes, connected controller data, supported vibration tests |
 | Motion | Device orientation and motion values when exposed by the browser |
 
-The device summary at the top tracks which diagnostic sections have been checked during the current session.
+The device summary at the top counts only tests verified as passed during the current session. Warnings and denied permissions do not count as confirmed passes.
 
 ### Display test notes
 
-Display patterns are visual checks, not color calibration. Full-screen mode makes dead-pixel, banding, line, retention, and motion inspection easier, but the results still depend on the display, browser rendering, scaling, and your own visual judgment.
+Display patterns are visual checks, not color calibration. Full-screen mode makes dead-pixel, banding, line, retention, and motion inspection easier, but the results still depend on the display, browser rendering, scaling, and your own visual judgment. Select **Looks OK** or **Issue noticed** to record a result; closing a pattern without a choice does not mark it checked. The 60fps reference uses elapsed time rather than assuming a specific display refresh rate.
 
 ### Keyboard and multi-touch checks
 
@@ -96,6 +96,12 @@ The repository includes a workflow that builds the standalone HTML and deploys i
 4. After a successful deployment, the app is available at `https://ttomohisa.github.io/htmlapps-device-check/`.
 
 The generated deployment artifact is `dist/index.html`.
+
+### Automatic version tags and GitHub Releases
+
+After a merge to `main`, `.github/workflows/release.yml` checks `app.config.json` for a stable version (for example, `1.0.6`). If `v1.0.6` does not exist, it builds and verifies the standalone HTML, then creates the `v1.0.6` tag at the validated main commit and publishes a GitHub Release with two downloads: `device-check.html` and `device-check.self-extract.html`.
+
+If a Release already exists for that version, the workflow skips it. If a tag exists but a Release is missing, the workflow stops rather than moving or reusing a possibly unrelated tag. Bump `app.config.json` for each new release. GitHub Actions and its `contents: write` permission must be enabled. This workflow does not merge pull requests or update the separate Browser Kitty site repository.
 
 ## Development and build layout
 
@@ -117,7 +123,8 @@ The generated deployment artifact is `dist/index.html`.
 │  └─ index.self-extract.html     # Gzip self-extracting distribution
 └─ .github/workflows/
    ├─ build-standalone.yml        # Build validation
-   └─ deploy-pages.yml            # GitHub Pages deployment
+   ├─ deploy-pages.yml            # GitHub Pages deployment
+   └─ release.yml                 # Verified main -> version tag + GitHub Release
 ```
 
 ### Build locally on Windows
@@ -136,7 +143,7 @@ After intentional source edits, build with `./build-standalone.ps1`, copy `dist/
 
 Camera and microphone access starts only after the corresponding test is started. When a previously selected input device can no longer satisfy the requested constraint, Device Check automatically retries with the browser's default device instead of stopping on an `OverconstrainedError`.
 
-While a camera or microphone is starting, Start is disabled and Stop is available immediately. Changing the selected input replaces the pending or live attempt. Stop and leaving the page invalidate pending work; any late input is released. Stop may not dismiss the browser's permission prompt. A "Checked" result remains a session result after Stop; the hint states that capture has stopped.
+While a camera or microphone is starting, Start is disabled and Stop is available immediately. Changing the selected input replaces the pending or live attempt. Stop and leaving the page invalidate pending work; any late input is released. Stop may not dismiss the browser's permission prompt. A "Checked" result remains a session result after an intentional Stop; the hint states that capture has stopped. If the input track instead ends unexpectedly while the guided quick check is active, that step is changed to Needs attention and removed from the guided completed count.
 
 If preview playback or microphone audio setup fails, resources are released and Start lets you retry. Web Audio support is checked before microphone permission is requested. If only the device list fails, the current input stays active and stoppable, with a retry hint.
 
@@ -149,8 +156,8 @@ The app does not need a backend for its diagnostics. The generated page includes
 - Some device APIs require HTTPS and may be unavailable when `dist/index.html` is opened directly with `file://`.
 - Browsers cannot automatically determine whether a speaker tone was physically audible, so speaker results require user confirmation.
 - Display tests are visual inspection tools and are not a substitute for a colorimeter or professional display calibration.
-- Gamepad haptics vary by browser, controller, connection method, and operating system.
-- Motion and orientation APIs are restricted or require an extra permission gesture on some mobile browsers.
+- Gamepad haptics vary by browser, controller, connection method, and operating system. Gamepads are counted as checked only after a button press or meaningful stick movement; blocked Gamepad APIs cannot prevent other tests from loading. If the browser restores this page from its back/forward cache, connected gamepad polling resumes automatically; a disconnected controller is no longer displayed as active.
+- Motion and orientation APIs are restricted or require an extra permission gesture on some mobile browsers. Device Check requests both available iOS sensor permissions in the original user gesture; Stop invalidates an outstanding request even if the browser prompt remains open.
 - Keyboard ghosting and rollover results may be affected by browser and OS key handling.
 - Network speed testing is intentionally not included.
 
