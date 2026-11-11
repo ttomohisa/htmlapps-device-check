@@ -112,6 +112,10 @@ if (file === 'dist/index.html' && [320, 360, 390, 1360].includes(width)) {
             await page.mouse.click(2, 1);
             assert.equal(await page.locator('#helpDialog').isVisible(), false, label + ': backdrop');
             if (file === 'dist/index.html' && width === 390 && height === 844) {
+              await page.locator('[data-mobile-nav="media"]').click();
+              assert.equal(await page.locator('#micResponded').isDisabled(), true, label + ': microphone response cannot be confirmed before capture');
+              assert.equal(await page.locator('#micNotResponded').isDisabled(), true, label + ': microphone failure cannot be recorded before capture');
+              assert.equal(await page.locator('[data-i18n="micVerifyQuestion"]').isVisible(), true, label + ': microphone confirmation is visible');
               await page.locator('[data-mobile-nav="home"]').click();
               await page.locator('#quickStart').click();
               assert.equal(await page.locator('#quickDiagnosis').isVisible(), true, label + ': quick guide stays visible');
@@ -125,6 +129,15 @@ if (file === 'dist/index.html' && [320, 360, 390, 1360].includes(width)) {
               assert.equal(await page.locator('[data-status-for="screen"]').first().getAttribute('data-state'), 'active', label + ': opening screen is not a pass');
               await page.locator('#screenLooksOk').click();
               assert.equal(await page.locator('[data-status-for="screen"]').first().getAttribute('data-state'), 'pass', label + ': confirmation records pass');
+              const expectedPatterns = language === 'ja' ?
+                { graysteps:'16段階', lines:'細線', rgb:'RGB階調', motion:'60/120Hz' } :
+                { graysteps:'16 steps', lines:'Fine lines', rgb:'RGB gradient', motion:'60/120Hz' };
+              for (const [pattern, expectedLabel] of Object.entries(expectedPatterns)) {
+                await page.locator('.swatch[data-pattern="' + pattern + '"]').click();
+                assert.equal((await page.locator('#screenOverlayLabel').textContent()).trim(), expectedLabel,
+                  label + ': localized display overlay ' + pattern);
+                await page.locator('#screenClose').click();
+              }
             }
             assert.deepEqual(errors, [], label + ': console errors');
             assert.deepEqual(requests, [], label + ': external runtime requests');
