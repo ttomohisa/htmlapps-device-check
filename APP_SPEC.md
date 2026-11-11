@@ -76,8 +76,8 @@ A local single-HTML implementation is useful because no captured media needs to 
 ### Display
 - Provide black, white, red, green, blue, continuous gradient, 16-step gray, checkerboard, 1px fine-line, and RGB gradient patterns.
 - Provide an image-retention flow that switches from a high-contrast pattern to neutral gray.
-- Provide a motion comparison with a 60fps reference and a display-refresh animation, including a requestAnimationFrame-based refresh estimate.
-- Open the selected pattern in a full-viewport overlay and request Fullscreen when available.
+- Provide a motion comparison with a 60fps reference driven by elapsed-time frame indices, not a minimum per-callback interval, and a display-refresh animation including a requestAnimationFrame-based refresh estimate.
+- Open the selected pattern in a full-viewport overlay and request Fullscreen when available. Mark the test as checking until the user chooses Looks OK / Issue noticed; closing without a choice preserves the prior result. Browser-initiated fullscreen exits must also close the overlay.
 - Exit with the on-screen close control or Escape.
 
 ### Keyboard
@@ -91,27 +91,27 @@ A local single-HTML implementation is useful because no captured media needs to 
 
 ### Pointer / touch
 - Use Pointer Events.
-- Display pointer type, x/y position, pressure, `navigator.maxTouchPoints`, current active touches, and the maximum simultaneous touch count observed during the session.
+- Display pointer type, x/y position, pressure, `navigator.maxTouchPoints`, current active touches, and the maximum simultaneous touch count observed during the session. Update mouse and pen hover coordinates without requiring a button press.
 - Support simultaneous touch pointers visually with separate markers.
 - Use `touch-action: none` only inside the dedicated test surface.
 
 ### Gamepad
 - Use the Gamepad API without external libraries.
 - Explain that some browsers expose controllers only after a button interaction.
-- Display controller identifier, all buttons, pressed state, and axes.
+- Display controller identifier, all buttons, pressed state, and axes. Preserve polling when another controller remains connected after one disconnects.
 - Detect `vibrationActuator` / `hapticActuators` where exposed and provide weak and strong rumble tests.
 
 ### Motion sensors
 - Support Device Orientation and Device Motion where available.
 - Request iOS-style permission only from a Start button when `requestPermission()` exists.
-- Show alpha/beta/gamma and acceleration including gravity when exposed.
+- Show alpha/beta/gamma and acceleration including gravity when exposed. Request all permission-gated sensor APIs within the original click activation; Stop and page exit invalidate pending permissions, callbacks, timers, and listeners.
 - Allow stopping listeners.
 
 ### Capability summary
 - Show support for getUserMedia, Web Audio, Pointer Events, Gamepad, Device Motion, WebGL, WebGPU, MediaRecorder, WebCodecs, Clipboard, Fullscreen, and Vibration.
 
 ### Quick diagnosis
-- Offer an optional guided pre-call flow for camera → microphone → speakers.
+- Offer an optional guided pre-call flow for camera → microphone → speakers. Keep its progress controls available in the mobile Camera & Audio view while the guide is active, and report incomplete checks without success messaging.
 - Never request camera or microphone permission automatically when the flow starts; the user must explicitly press each device Start button.
 - Keep the guide visible while active and allow direct step navigation.
 
@@ -121,7 +121,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - No runtime network requests.
 - Help dialog explains permissions, secure-context limitations, speaker-test limitation, and privacy.
 - While the native Help modal is open, lock background scrolling on both the document root and body. Keep the existing bounded dialog shell and independently scrolling Help content; Close, Escape, and backdrop dismissal retain their native behavior.
-- Test status states: untested, checking, checked, needs attention, unsupported.
+- Test status states: untested, checking, checked, needs attention, unsupported. The summary pass count includes only confirmed checks, not warnings or blocked tests.
 - No test result persistence; only language preference may use localStorage.
 
 ## 5. Data and privacy
