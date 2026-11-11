@@ -97,6 +97,12 @@ The repository includes a workflow that builds the standalone HTML and deploys i
 
 The generated deployment artifact is `dist/index.html`.
 
+### Automatic version tags and GitHub Releases
+
+After a merge to `main`, `.github/workflows/release.yml` checks `app.config.json` for a stable version (for example, `1.0.6`). If `v1.0.6` does not exist, it builds and verifies the standalone HTML, then creates the `v1.0.6` tag at the validated main commit and publishes a GitHub Release with two downloads: `device-check.html` and `device-check.self-extract.html`.
+
+If a Release already exists for that version, the workflow skips it. If a tag exists but a Release is missing, the workflow stops rather than moving or reusing a possibly unrelated tag. Bump `app.config.json` for each new release. GitHub Actions and its `contents: write` permission must be enabled. This workflow does not merge pull requests or update the separate Browser Kitty site repository.
+
 ## Development and build layout
 
 ```text
@@ -117,7 +123,8 @@ The generated deployment artifact is `dist/index.html`.
 │  └─ index.self-extract.html     # Gzip self-extracting distribution
 └─ .github/workflows/
    ├─ build-standalone.yml        # Build validation
-   └─ deploy-pages.yml            # GitHub Pages deployment
+   ├─ deploy-pages.yml            # GitHub Pages deployment
+   └─ release.yml                 # Verified main -> version tag + GitHub Release
 ```
 
 ### Build locally on Windows
