@@ -37,7 +37,7 @@ test('Help retains its existing bounded shell and independently scrolling conten
 });
 
 test('Help is concise, bilingual, and keeps material limitations', () => {
-  const help = html.match(/<!-- APP:HELP:BEGIN -->([\\s\\S]*?)<!-- APP:HELP:END -->/);
+  const help = html.match(/<!-- APP:HELP:BEGIN -->([\s\S]*?)<!-- APP:HELP:END -->/);
   assert.ok(help, 'Help content must stay in its source region');
   assert.doesNotMatch(help[1], /data-i18n="helpDialogUse"/, 'Closing instructions do not need to take space in the UI');
   const lists = [...help[1].matchAll(/<li data-i18n="([^"]+)"/g)].map(m => m[1]);
@@ -50,7 +50,7 @@ test('Help is concise, bilingual, and keeps material limitations', () => {
   const start = html.indexOf('    const translations=');
   const end = html.indexOf('    const $=');
   assert.ok(start >= 0 && end > start, 'Real translations must be present');
-  vm.runInContext(html.slice(start, end) + '\\nthis.copy=translations;', context);
+  vm.runInContext(html.slice(start, end) + '\nthis.copy=translations;', context);
   const ja = context.copy.ja, en = context.copy.en;
   for (const key of ['helpStep1', 'helpStep2', 'helpStep3', 'helpPrivacyBody', 'helpOffline',
     'helpNotePermission', 'helpNoteContext', 'helpMediaLifecycle', 'helpKeyboardReset', 'helpNoteLimitation']) {
