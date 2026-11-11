@@ -55,7 +55,7 @@ function harness(config={}) {
 
 const begin = (h,kind='camera') => kind==='camera'?h.api.startCamera():h.api.startMic();
 const stop = (h,kind='camera') => kind==='camera'?h.api.stopCamera():h.api.stopMic();
-const acquired = async(h,kind='camera',name='current') => {const p=begin(h,kind),s=stream(name,kind==='camera'?'video':'audio');h.requests.at(-1).resolve(s);await p;return s};
+const acquired = async(h,kind='camera',name='current',confirmMic=true) => {const p=begin(h,kind),s=stream(name,kind==='camera'?'video':'audio');h.requests.at(-1).resolve(s);await p;if(kind==='mic'&&confirmMic&&h.api.snapshot().micStream&&!h.node('#micResponded').disabled)h.node('#micResponded').listeners.click();return s};
 for(const kind of ['camera','mic']) {
  test(`${kind}: pending Start disables repeats in UI and exposes Stop immediately`,async()=>{const h=harness(),p=begin(h,kind);assert.equal(h.node(`#${kind}Start`).disabled,true);assert.equal(h.node(`#${kind}Stop`).disabled,false);stop(h,kind);h.requests[0].resolve(stream('late',kind==='camera'?'video':'audio'));await p});
  test(`${kind}: overlapping starts release every obsolete resource`,async()=>{const h=harness(),a=stream('old',kind==='camera'?'video':'audio'),b=stream('new',kind==='camera'?'video':'audio');const p=begin(h,kind),q=begin(h,kind);h.requests[1].resolve(b);await q;h.requests[0].resolve(a);await p;assert.equal(a.track.readyState,'ended');assert.equal(b.track.readyState,'live');stop(h,kind);assert.equal(b.track.readyState,'ended');assert.ok(h.contexts.every(c=>c.closed===1));assert.equal(h.raf.size,0)});
@@ -89,3 +89,18 @@ test('mic: partial graph setup failure disconnects all earlier nodes',async()=>{
 test('mic: an already queued stale animation cannot duplicate the newer meter loop',async()=>{const h=harness();await acquired(h,'mic');const staleFrame=[...h.raf.values()][0];await acquired(h,'mic');assert.equal(h.raf.size,1);staleFrame();assert.equal(h.raf.size,1);stop(h,'mic');staleFrame();assert.equal(h.raf.size,0)});
 test('initial default selections use empty device IDs rather than localized option labels',()=>{for(const kind of ['camera','mic']){const option=html.match(new RegExp(`<select[^>]+id="${kind}Select"[^>]*>\\s*(<option[^>]*>)`));assert.ok(option,kind);assert.match(option[1],/value=""/,'Default must not request an exact device with its translated label')}});
 test('mic: application-owned startup failure rerenders fully after a language change',async()=>{const h=harness({contextState:'suspended'});h.api.changeLanguage('ja');await acquired(h,'mic');assert.match(h.node('#micHint').textContent,/音声解析/);h.api.changeLanguage('en');assert.match(h.node('#micHint').textContent,/Audio analysis could not start/);assert.doesNotMatch(h.node('#micHint').textContent,/音声解析/)});
+
+test('mic: acquired silent stream stays checking until the user verifies meter response',async()=>{
+  const h=harness(),s=await acquired(h,'mic','silent',false);
+  assert.equal(s.track.readyState,'live');
+  assert.equal(h.api.snapshot().testState.mic,'active');
+  assert.equal(h.node('#micResponded').disabled,false);
+  assert.equal(h.node('#micNotResponded').disabled,false);
+  h.node('#micNotResponded').listeners.click();
+  assert.equal(h.api.snapshot().testState.mic,'warn');
+  h.node('#micResponded').listeners.click();
+  assert.equal(h.api.snapshot().testState.mic,'pass');
+  stop(h,'mic');
+  assert.equal(h.node('#micResponded').disabled,true);
+  assert.equal(h.node('#micNotResponded').disabled,true);
+});
