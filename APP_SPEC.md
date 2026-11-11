@@ -153,7 +153,7 @@ A local single-HTML implementation is useful because no captured media needs to 
 - Permission errors are described without claiming hardware failure.
 - Fullscreen display overlay provides an explicit close control and exits with Escape.
 - Motion respects `prefers-reduced-motion`.
-- Camera preview uses `playsinline` for smartphones.
+- Camera preview uses `playsinline` for smartphones, and the idle placeholder is centered over the video box without occupying a separate grid row.
 
 ## 8. Performance expectations
 
@@ -214,3 +214,10 @@ Keep existing build metadata at the very end of How to use & Notes, not the main
 ## Header visibility
 
 Keep the header version visible on narrow smartphones without overlapping the app name or language/Help controls. Verify Japanese and English at 320px, 360px, 390px and desktop widths.
+
+## Release automation
+
+- After a merge pushes the new version to `main`, the Release workflow reads the stable Semantic Versioning value from `app.config.json`.
+- A previously released version is skipped; an existing tag without its Release is not moved or reused automatically.
+- A new version runs repository validation, builds both standalone HTML variants, then creates `v<version>` on the validated commit and publishes the two HTMLs as GitHub Release assets.
+- Publishing requires GitHub Actions `contents: write`; the separate Browser Kitty site repository is not updated by this workflow.
