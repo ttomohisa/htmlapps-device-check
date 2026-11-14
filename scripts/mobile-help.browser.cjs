@@ -30,7 +30,9 @@ async function main() {
  assert.equal(await headerVersion.isVisible(),true,label+': header version is visible');
  assert.equal((await headerVersion.textContent()).trim(),'v'+JSON.parse(fs.readFileSync(path.resolve(__dirname,'../app.config.json'),'utf8')).version,label+': current version');
  assert.ok(await headerVersion.evaluate(el=>{const r=el.getBoundingClientRect();if(r.left<0||r.right>innerWidth||el.scrollWidth>el.clientWidth+1)return false;for(let p=el.parentElement;p;p=p.parentElement){if(/hidden|clip/.test(getComputedStyle(p).overflowX)){const b=p.getBoundingClientRect();if(r.left<b.left-1||r.right>b.right+1)return false;}}return true;}),label+': version is not clipped');
-            assert.equal(await page.locator('[data-i18n="localBadge"]').count(), 0, label + ': no invented privacy badge');
+            const localBadge = page.locator('[data-i18n="localBadge"]');
+            assert.equal(await localBadge.count(), 1, label + ': shared local-processing badge present');
+            assert.equal((await localBadge.textContent()).trim(), language === 'ja' ? '完全ローカル処理' : 'Fully local processing', label + ': badge text localized');
             assert.equal(await page.locator('main #buildVersion').count(), 0, label);
             assert.equal(await page.locator('footer').isVisible(), width > 600, label);
             assert.equal(await page.locator('.mobile-bottom-nav').isVisible(), width <= 600, label + ': functional navigation preserved');
