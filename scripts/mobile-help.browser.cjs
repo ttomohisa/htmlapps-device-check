@@ -33,6 +33,17 @@ async function main() {
             const localBadge = page.locator('[data-i18n="localBadge"]');
             assert.equal(await localBadge.count(), 1, label + ': shared local-processing badge present');
             assert.equal((await localBadge.textContent()).trim(), language === 'ja' ? '完全ローカル処理' : 'Fully local processing', label + ': badge text localized');
+            assert.equal(await page.locator('header .local-badge').count(), 0, label + ': badge must not be in the header');
+            const heroBadge = page.locator('.page-intro > .local-badge');
+            assert.equal(await heroBadge.count(), 1, label + ': badge is beside hero content');
+            assert.equal(await heroBadge.isVisible(), width > 600, label + ': badge visibility matches reference');
+            if (width > 600) {
+              assert.ok(await heroBadge.evaluate(badge => {
+                const hero = badge.closest('.page-intro').getBoundingClientRect();
+                const box = badge.getBoundingClientRect();
+                return box.left > hero.left + hero.width / 2 && box.right <= hero.right + 1;
+              }), label + ': badge aligned at upper-right of hero');
+            }
             assert.equal(await page.locator('main #buildVersion').count(), 0, label);
             assert.equal(await page.locator('footer').isVisible(), width > 600, label);
             assert.equal(await page.locator('.mobile-bottom-nav').isVisible(), width <= 600, label + ': functional navigation preserved');
