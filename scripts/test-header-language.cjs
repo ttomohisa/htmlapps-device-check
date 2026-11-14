@@ -57,6 +57,7 @@ function assertHeader(h, language) {
   assert.equal(h.$('#helpTitle').textContent, help);
   assert.equal(h.$('#closeHelpButton').getAttribute('aria-label'), language === 'ja' ? '閉じる' : 'Close');
   assert.equal(h.$('#closeHelpButton').title, language === 'ja' ? '閉じる' : 'Close');
+  assert.equal(h.$('#localBadgeText').textContent, language === 'ja' ? '完全ローカル処理' : 'Fully local processing');
 }
 for (const language of ['ja', 'en']) {
   test(`${language}: fresh header uses compact target-language labels and localized descriptions`, () => assertHeader(harness({ language }), language));
@@ -84,9 +85,18 @@ test('existing Help close control stays localized while open', () => {
   assert.equal(h.$('#closeHelpButton').getAttribute('aria-label'), 'Close');
   h.$('#closeHelpButton').click(); assert.equal(h.$('#helpDialog').open, false);
 });
-test('header keeps its original no-badge layout', () => {
+test('shared local-processing badge sits beside the hero and is hidden on mobile', () => {
   const header = html.match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0];
-  assert.ok(header); assert.doesNotMatch(header, /privacy-badge|localOnly|完全ローカル処理/);
+  const hero = html.match(/<section class="page-intro"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(header); assert.ok(hero);
+  assert.doesNotMatch(header, /class="local-badge"/);
+  assert.match(hero, /class="local-badge"/);
+  assert.match(hero, /M12 3 5 6v5c0 4\.6 2\.8 8 7 10 4\.2-2 7-5\.4 7-10V6z/);
+  assert.match(hero, /data-i18n="localBadge">完全ローカル処理<\/span>/);
+  assert.equal((html.match(/class="local-badge"/g) || []).length, 1);
+  assert.match(html, /\.local-badge\{display:inline-flex;[^}]*padding:7px 0;border:0;border-radius:0;[^}]*background:transparent;[^}]*font-weight:500;/);
+  assert.match(html, /\.page-intro\{display:flex;align-items:flex-start;justify-content:space-between/);
+  assert.match(html, /@media\(max-width:600px\)\{[\s\S]*?\.local-badge\{display:none\}/);
 });
 test('initial Japanese HTML describes the language target before initialization', () => {
   const button = html.match(/<button[^>]*id="languageButton"[^>]*>/)[0];
