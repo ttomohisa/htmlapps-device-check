@@ -94,6 +94,7 @@ test('shared local-processing badge sits beside the hero and is hidden on mobile
   assert.match(hero, /M12 3 5 6v5c0 4\.6 2\.8 8 7 10 4\.2-2 7-5\.4 7-10V6z/);
   assert.match(hero, /data-i18n="localBadge">完全ローカル処理<\/span>/);
   assert.equal((html.match(/class="local-badge"/g) || []).length, 1);
+  assert.match(html, /\.local-badge\{display:inline-flex;[^}]*padding:7px 0;border:0;border-radius:0;[^}]*background:transparent;[^}]*font-weight:500;/);
   assert.match(html, /\.page-intro\{display:flex;align-items:flex-start;justify-content:space-between/);
   assert.match(html, /@media\(max-width:600px\)\{[\s\S]*?\.local-badge\{display:none\}/);
 });
